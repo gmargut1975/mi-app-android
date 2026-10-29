@@ -1,0 +1,1370 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Hitz Jokoa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one-screen phone game; app column max 480px, sticky top bar, fixed bottom tab bar */
+:root{
+  --bg:#e9f0eb; --surface:#ffffff; --surface2:#dde8e1; --ink:#0f2a21; --muted:#56706a;
+  --accent:#1d7a50; --accent-ink:#ffffff; --accent-deep:#135c3b;
+  --red:#cf3a2f; --red-soft:#fbe3df; --good-soft:#d8f1e2; --gold:#e3a72f; --line:#c9d8cf;
+  --display:"Fredoka","Baloo 2",ui-rounded,system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --shadow:0 3px 0 var(--line);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1c17; --surface:#142b23; --surface2:#1c382e; --ink:#e6f2ec; --muted:#93ada4;
+  --accent:#3fb27a; --accent-ink:#06160f; --accent-deep:#2a8a5b;
+  --red:#ef6a5c; --red-soft:#3a1d1a; --good-soft:#163d2b; --gold:#f0bd4f; --line:#0a1612;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0c1c17; --surface:#142b23; --surface2:#1c382e; --ink:#e6f2ec; --muted:#93ada4;
+  --accent:#3fb27a; --accent-ink:#06160f; --accent-deep:#2a8a5b;
+  --red:#ef6a5c; --red-soft:#3a1d1a; --good-soft:#163d2b; --gold:#f0bd4f; --line:#0a1612;
+  color-scheme:dark;}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;-webkit-tap-highlight-color:transparent;}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.app{max-width:480px;margin:0 auto;min-height:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px calc(96px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;font-weight:600}
+.sub{color:var(--muted);font-size:14px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:12px;padding-block:8px}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.brand svg{width:36px;height:36px;flex:none}
+.brand h1{font-size:24px;letter-spacing:.01em}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:700;font-variant-numeric:tabular-nums;box-shadow:var(--shadow)}
+.pill svg{width:18px;height:18px}
+
+/* level */
+.level{background:var(--surface);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.level-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.level-row strong{font-family:var(--display);font-size:20px;font-weight:600}
+.bar{height:12px;border-radius:999px;background:var(--surface2);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .5s ease}
+
+/* modes */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mode{border-radius:20px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:128px;background:var(--surface);box-shadow:0 4px 0 var(--line);transition:transform .08s}
+.mode:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.mode .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface2);color:var(--accent)}
+.mode .ic svg{width:24px;height:24px}
+.mode b{font-family:var(--display);font-size:20px;font-weight:600}
+.mode span{font-size:13px;color:var(--muted);line-height:1.35}
+.mode.hero{grid-column:1/-1;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 0 var(--accent-deep);min-height:0;flex-direction:row;align-items:center;gap:14px}
+.mode.hero .ic{background:rgba(255,255,255,.18);color:var(--accent-ink)}
+.mode.hero span{color:inherit;opacity:.85}
+.mode.hero:active{box-shadow:0 4px 0 var(--accent-deep);transform:none}
+.mode.hero>button:active{transform:translateY(2px)}
+.seg.dark{background:rgba(0,0,0,.18)}
+.seg.dark button{color:inherit;opacity:.8}
+.seg.dark button[aria-pressed="true"]{background:var(--accent-ink);color:var(--accent);opacity:1;box-shadow:none}
+.clock{font-family:var(--display);font-size:56px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1}
+.clock.warn{color:var(--red);animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.12)}}
+.tbar{height:10px;border-radius:999px;background:var(--surface2);overflow:hidden}
+.tbar>i{display:block;height:100%;width:100%;background:var(--accent);border-radius:999px}
+.tbar>i.warn{background:var(--red)}
+.tag{display:inline-block;padding:2px 10px;margin:2px 0;border-radius:999px;background:var(--surface);font-weight:600;font-size:15px}
+.tag.hit{background:var(--accent);color:var(--accent-ink)}
+
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin-inline:-4px;padding-inline:4px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:999px;background:var(--surface);font-weight:600;font-size:14px;box-shadow:var(--shadow);white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chip small{opacity:.6;font-weight:500;margin-left:4px}
+.seg{display:flex;background:var(--surface2);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 0 var(--line)}
+
+/* tabbar */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:2px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabs nav{max-width:480px;margin:0 auto;display:flex}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px 12px;font-size:12px;font-weight:700;color:var(--muted)}
+.tabs button svg{width:26px;height:26px}
+.tabs button[aria-current="page"]{color:var(--accent)}
+
+/* game */
+.game{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.game-in{max-width:480px;width:100%;margin:0 auto;flex:1;display:flex;flex-direction:column;gap:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 16px;min-height:0}
+.ghead{display:flex;align-items:center;gap:12px}
+.ghead .bar{flex:1;height:14px}
+.x{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--muted)}
+.x svg{width:24px;height:24px}
+.hearts{display:flex;gap:2px;color:var(--red)}
+.hearts svg{width:22px;height:22px}
+.hearts .off{color:var(--surface2)}
+.combo{font-family:var(--display);font-weight:600;color:var(--gold);font-size:15px;min-height:20px;text-align:center}
+.prompt{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;text-align:center;min-height:0}
+.prompt .q{font-family:var(--display);font-size:clamp(30px,9vw,42px);font-weight:600;line-height:1.1;overflow-wrap:anywhere}
+.prompt .q.long{font-size:clamp(22px,6.4vw,28px);line-height:1.25}
+.prompt .q .gap{display:inline-block;min-width:3.2em;border-bottom:4px solid var(--accent);color:var(--accent)}
+.opts{display:grid;gap:10px}
+.opt{background:var(--surface);border-radius:16px;padding:16px;font-size:18px;font-weight:600;box-shadow:0 4px 0 var(--line);text-align:center;transition:transform .08s;overflow-wrap:anywhere}
+.opt:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.opt.ok{background:var(--good-soft);box-shadow:0 4px 0 var(--accent);color:var(--ink)}
+.opt.bad{background:var(--red-soft);box-shadow:0 4px 0 var(--red);animation:shake .35s}
+.opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.big{width:100%;padding:16px;border-radius:16px;font-family:var(--display);font-size:20px;font-weight:600;background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 0 var(--accent-deep)}
+.big:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-deep)}
+.big.ghost{background:var(--surface);color:var(--ink);box-shadow:0 4px 0 var(--line)}
+.big.danger{background:var(--red);color:#fff;box-shadow:0 4px 0 color-mix(in srgb,var(--red) 60%,#000)}
+.big:disabled{opacity:.45}
+.sheet{border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;animation:up .22s ease-out}
+.sheet.ok{background:var(--good-soft)}
+.sheet.bad{background:var(--red-soft)}
+.sheet h3{font-size:22px}
+.sheet.ok h3{color:var(--accent)}
+.sheet.bad h3{color:var(--red)}
+.sheet p{margin:0;line-height:1.45}
+.sheet .ex{font-style:italic;color:var(--muted);font-size:14px}
+@keyframes up{from{transform:translateY(20px);opacity:.3}}
+
+/* flashcard */
+.card-wrap{flex:1;perspective:1200px;display:flex;min-height:240px}
+.fcard{flex:1;position:relative;transform-style:preserve-3d;transition:transform .45s;border-radius:24px}
+.fcard.flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;background:var(--surface);box-shadow:0 6px 0 var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center}
+.face.back{transform:rotateY(180deg);background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 0 var(--accent-deep)}
+.face .w{font-family:var(--display);font-size:clamp(28px,8vw,40px);font-weight:600;line-height:1.15;overflow-wrap:anywhere}
+.face .tap{font-size:13px;color:var(--muted)}
+.face.back .tap,.face.back .exb{color:inherit;opacity:.85}
+.exb{font-style:italic;font-size:15px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* write */
+.inp{width:100%;padding:16px;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font-size:20px;font-family:var(--body);text-align:center}
+.hint{font-family:ui-monospace,Menlo,monospace;letter-spacing:.2em;color:var(--muted);font-size:18px}
+
+/* sections */
+.panel{background:var(--surface);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
+label{font-size:13px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.field{width:100%;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:16px;font-weight:500}
+textarea.field{min-height:110px;resize:vertical;font-family:ui-monospace,Menlo,monospace;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--surface2)}
+.li:last-child{border-bottom:0}
+.li .t{flex:1;min-width:0}
+.li .t b{display:block;font-weight:700;overflow-wrap:anywhere}
+.li .t span{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.del{padding:8px 12px;border-radius:10px;font-size:13px;font-weight:700;color:var(--red);background:var(--red-soft)}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;z-index:40;font-size:14px;max-width:calc(100% - 32px);text-align:center}
+.dots{display:flex;gap:3px}
+.dots i{width:8px;height:8px;border-radius:2px;background:var(--surface2)}
+.dots i.on{background:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border-radius:16px;padding:12px;text-align:center;box-shadow:var(--shadow)}
+.stat b{display:block;font-family:var(--display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted);font-weight:600}
+.catrow{display:grid;grid-template-columns:110px 1fr 44px;align-items:center;gap:10px;font-size:14px;font-weight:600}
+.catrow em{font-style:normal;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.end{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+.end .lb{width:96px;height:96px;animation:spin 1.2s ease-out}
+@keyframes spin{from{transform:rotate(-180deg) scale(.4)}}
+.end h2{font-size:34px}
+.small-link{color:var(--accent);font-weight:700;font-size:14px;padding:6px 0;text-align:left}
+.snd{color:var(--muted);padding:6px 8px}
+.mode.champ{background:linear-gradient(135deg,var(--accent) 0%,var(--accent-deep) 100%)}
+.mode.champ .ic{color:var(--gold);background:rgba(0,0,0,.18)}
+.rec{font-family:var(--display);font-weight:600;opacity:1!important;color:var(--gold)!important;font-size:15px!important;margin-top:4px}
+.mode.daily .ic{color:var(--gold)}
+.mode.daily.done .ic{background:var(--good-soft);color:var(--accent)}
+.powers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pw{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border-radius:12px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-weight:700;font-size:13px}
+.pw svg{width:18px;height:18px;color:var(--accent)}
+.pw em{font-style:normal;font-size:11px;color:var(--muted);background:var(--surface2);border-radius:999px;padding:1px 6px}
+.pw:disabled{opacity:.4}
+#pw-freeze svg{color:#3a9ad9}
+.score{display:flex;flex-direction:column;align-items:center;line-height:1}
+.score b{font-family:var(--display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.score span{font-size:11px;color:var(--muted);font-weight:600}
+.mult{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--gold);color:#1d1400;font-weight:700;animation:bump .3s}
+.mult.m3{background:#f08a2f}.mult.m4{background:var(--red);color:#fff}
+@keyframes bump{50%{transform:scale(1.3)}}
+.inp.good{border-color:var(--accent);background:var(--good-soft)}
+.inp.wrong{border-color:var(--red);background:var(--red-soft);animation:shake .35s}
+.pop-in{animation:popin .3s ease-out}
+@keyframes popin{from{transform:scale(.6);opacity:0}}
+.clock.ice,.tbar>i.ice{color:#3a9ad9;background:#3a9ad9}
+.clock.ice{background:none}
+.prompt{position:relative}
+.pop{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-family:var(--display);font-weight:700;font-size:30px;color:var(--accent);pointer-events:none;animation:float 1s ease-out forwards}
+.pop.hot{color:var(--gold);font-size:38px}
+@keyframes float{to{transform:translate(-50%,-70px);opacity:0}}
+.banner{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:30;background:var(--ink);color:var(--bg);font-family:var(--display);font-size:28px;font-weight:700;padding:16px 26px;border-radius:20px;text-align:center;animation:bannr 1.5s ease-out forwards;pointer-events:none;max-width:90%}
+.banner small{display:block;font-size:15px;opacity:.75}
+@keyframes bannr{0%{transform:translate(-50%,-50%) scale(.5);opacity:0}15%{transform:translate(-50%,-50%) scale(1.08);opacity:1}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+.fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+.medal-toast{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:12px;background:var(--surface);border:3px solid var(--gold);border-radius:18px;padding:10px 18px;box-shadow:0 6px 0 var(--line);animation:drop 2.6s ease-out forwards;max-width:calc(100% - 32px)}
+.medal-toast svg{width:36px;height:36px;color:var(--gold);flex:none}
+.medal-toast small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.medal-toast b{font-family:var(--display);font-size:20px;font-weight:600}
+@keyframes drop{0%{transform:translate(-50%,-120%)}12%{transform:translate(-50%,0)}85%{transform:translate(-50%,0);opacity:1}100%{transform:translate(-50%,-120%);opacity:0}}
+.sheet.slim{padding:12px 16px;gap:6px}
+.sheet.slim h3{font-size:20px}
+.medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.medal{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:10px 6px;border-radius:14px;background:var(--surface2);opacity:.55}
+.medal svg{width:34px;height:34px;color:var(--muted)}
+.medal b{font-size:13px}
+.medal span{font-size:11px;color:var(--muted);line-height:1.3}
+.medal.on{opacity:1;background:var(--good-soft)}
+.medal.on svg{color:var(--gold)}
+.review{border-radius:16px;background:var(--surface2);padding:14px;display:flex;flex-direction:column;gap:10px}
+.review .fix{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
+.review s{color:var(--red)}
+.review ins{text-decoration:none;font-weight:700;color:var(--accent)}
+.review p{margin:0;font-size:14px;line-height:1.45}
+.chk{flex-direction:row;align-items:center;gap:8px;font-size:14px;color:var(--ink);font-weight:600}
+.chk input{width:20px;height:20px;accent-color:var(--accent)}
+.esprog{font-size:12px;color:var(--muted);font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px;margin-top:2px}
+.esprog svg{width:14px;height:14px}
+.bonus{position:fixed;inset:0;z-index:35;background:color-mix(in srgb,var(--bg) 92%,transparent);display:flex;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow-y:auto;animation:popin .3s ease-out}
+.bonus-in{width:100%;max-width:448px;display:flex;flex-direction:column;gap:14px;background:var(--surface);border:3px solid var(--gold);border-radius:24px;padding:20px 16px;box-shadow:0 6px 0 var(--line)}
+.bonus-tag{align-self:center;display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#1d1400;font-family:var(--display);font-weight:700;font-size:18px;padding:6px 16px;border-radius:999px}
+.bonus-tag svg{width:18px;height:18px}
+.bonus .q{font-size:clamp(22px,6.4vw,28px);line-height:1.25;overflow-wrap:anywhere}
+.lvls{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.lv{padding:7px 0;border-radius:10px;background:var(--surface2);font-weight:700;font-size:13px;color:var(--muted)}
+.lv.done{color:var(--accent)}
+.lv.cur{background:var(--accent);color:var(--accent-ink)}
+.lvlup{width:100%;border:3px solid var(--gold);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:2px;background:var(--surface);animation:popin .4s ease-out}
+.lvlup small{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.lvlup b{font-family:var(--display);font-size:26px;font-weight:700;color:var(--accent)}
+.lvlup span{font-size:14px;color:var(--muted)}
+.newday{display:flex;align-items:center;gap:12px;text-align:left;background:var(--surface);border:3px solid var(--gold);border-radius:20px;padding:14px 16px;box-shadow:0 4px 0 var(--line)}
+.newday div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.newday b{font-family:var(--display);font-size:20px;font-weight:600}
+.newday span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.newday em{font-style:normal;font-weight:700;background:var(--gold);color:#1d1400;border-radius:999px;padding:8px 14px;font-family:var(--display)}
+.expl{margin:0;padding:10px 12px;border-radius:12px;background:var(--surface);font-size:14px;line-height:1.45}
+.expl b{color:var(--accent);margin-right:4px}
+.right-ans{display:block;font-family:var(--display);font-size:24px;font-weight:600;margin-bottom:4px;overflow-wrap:anywhere}
+.big.wait{position:relative;overflow:hidden;opacity:1}
+.big.wait::after{content:"";position:absolute;left:0;top:0;bottom:0;width:100%;background:rgba(255,255,255,.28);transform-origin:left;animation:waitbar var(--wait,3500ms) linear forwards}
+@keyframes waitbar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.bonus-in.verb{border-color:var(--accent)}
+.bonus-tag.vt{background:var(--accent);color:var(--accent-ink)}
+.letter{font-weight:700;color:var(--muted);margin-right:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="lauburu" viewBox="-52 -52 104 104">
+      <g fill="currentColor">
+        <path id="arm" d="M0 0 A25 25 0 0 1 0 -50 A12.5 12.5 0 0 1 0 -25 A12.5 12.5 0 0 0 0 0Z"/>
+        <use href="#arm" transform="rotate(90)"/><use href="#arm" transform="rotate(180)"/><use href="#arm" transform="rotate(270)"/>
+      </g>
+    </symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c1 3.5 5 5.6 5 10.5A5 5 0 0 1 12 18a5 5 0 0 1-5-5.2c0-2 1-3.4 2-4.3.2 1.6 1 2.6 2 3 0-3.3 0-6.4 1-9.5Z"/><path fill="currentColor" opacity=".35" d="M5 15a7 7 0 0 0 14 0c0 4-3 7-7 7s-7-3-7-7Z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 2 2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7Z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21s-8-5.2-8-11.2A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 2.8C20 15.8 12 21 12 21Z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none" d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path fill="currentColor" d="M13 2 4 14h7l-1 8 9-12h-7Z"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="16" rx="2.5" fill="currentColor" opacity=".4"/><rect x="8" y="2" width="13" height="16" rx="2.5" fill="currentColor"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 3.5a2.1 2.1 0 0 1 3 3L8 17l-4 1 1-4Z"/><rect x="4" y="20" width="16" height="2" rx="1" fill="currentColor" opacity=".4"/></symbol>
+    <symbol id="i-quote" viewBox="0 0 24 24"><path fill="currentColor" d="M4 5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="currentColor" opacity=".3"/><rect x="9.5" y="1.5" width="5" height="2.5" rx="1" fill="currentColor"/><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none" d="M12 8.5V13l3 2"/></symbol>
+    <symbol id="i-snow" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none" d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path fill="currentColor" d="M12 5C6.5 5 2.7 9.4 1.5 12c1.2 2.6 5 7 10.5 7s9.3-4.4 10.5-7C21.3 9.4 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path fill="currentColor" d="M4 5l10 7-10 7Z"/><rect x="16" y="5" width="3.5" height="14" rx="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-medal" viewBox="0 0 24 24"><path fill="currentColor" opacity=".45" d="M7 2h4l2 6H9ZM13 2h4l-2 6h-4Z"/><circle cx="12" cy="15" r="7" fill="currentColor"/><path fill="var(--surface)" d="m12 11 1.2 2.5 2.7.3-2 1.9.5 2.7L12 17.1l-2.4 1.3.5-2.7-2-1.9 2.7-.3Z"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9h4l5-4v14l-5-4H3Z"/><path stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9h4l5-4v14l-5-4H3Z"/><path stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="m16 9 6 6m0-6-6 6"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path fill="currentColor" d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5Z"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3" fill="currentColor" opacity=".3"/><rect x="3" y="5" width="18" height="5" rx="2" fill="currentColor"/><rect x="7" y="2" width="2.5" height="5" rx="1" fill="currentColor"/><rect x="14.5" y="2" width="2.5" height="5" rx="1" fill="currentColor"/><path stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none" d="m8.5 15 2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3 2.5 11h2.5v9h5v-6h4v6h5v-9h2.5Z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" opacity=".25"/><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M12 7v10M7 12h10"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><rect x="3" y="12" width="4.5" height="9" rx="1.5" fill="currentColor"/><rect x="9.75" y="7" width="4.5" height="14" rx="1.5" fill="currentColor" opacity=".6"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.5" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<div class="app" id="app"></div>
+<div class="tabs"><nav id="tabs"></nav></div>
+<div id="layer"></div>
+
+<script>
+/* ---------- DATOS BASE ---------- */
+function alts(s){return String(s).split(/\s*[\/;,]\s*/).map(x=>x.trim()).filter(Boolean)}
+const BASE_WORDS = {
+  "Etxea":[["sukaldea","la cocina"],["logela","el dormitorio / la habitación / el cuarto"],["komuna","el baño / el servicio / el váter"],["leihoa","la ventana"],["atea","la puerta"],["teilatua","el tejado"],["eskailerak","las escaleras"],["giltza","la llave"],["ohea","la cama"],["mahaia","la mesa"],["etxea","la casa / el hogar"],["aulkia","la silla"],["ispilua","el espejo"]],
+  "Natura":[["mendia","el monte / la montaña"],["ibaia","el río"],["hodeia","la nube"],["ekaitza","la tormenta"],["elurra","la nieve"],["haizea","el viento / el aire"],["zuhaitza","el árbol"],["hondartza","la playa"],["lainoa","la niebla"],["tximista","el rayo / el relámpago"],["basoa","el bosque"],["hostoa","la hoja"],["euria","la lluvia"],["itsasoa","el mar"]],
+  "Sentimenduak":[["poza","la alegría / el gozo"],["tristura","la tristeza"],["beldurra","el miedo / el temor"],["haserrea","el enfado"],["lotsa","la vergüenza"],["maitasuna","el amor / el cariño"],["harrotasuna","el orgullo"],["errukia","la compasión / la piedad"],["ezinegona","la inquietud / el desasosiego"],["mina","el dolor / la pena"],["irrika","el anhelo / el deseo / el ansia"],["zoriona","la felicidad / la suerte"]],
+  "Aditzak":[["irakatsi","enseñar"],["ahaztu","olvidar"],["gogoratu","recordar / acordarse"],["saiatu","intentar / tratar"],["lortu","conseguir / lograr"],["aurkitu","encontrar / hallar"],["galdu","perder / perderse"],["itxaron","esperar / aguardar"],["erabaki","decidir"],["lagundu","ayudar / acompañar"],["konpondu","arreglar / reparar"],["ulertu","entender / comprender"],["utzi","dejar / prestar"],["ikasi","aprender / estudiar"],["eskatu","pedir"],["garatu","desarrollar"],["baieztatu","confirmar / afirmar"],["ukatu","negar"],["onartu","aceptar / admitir / aprobar"],["saihestu","evitar"],["iradoki","sugerir"],["nabarmendu","destacar / resaltar"],["harritu","sorprenderse / asombrarse"],["zehaztu","precisar / concretar / especificar"],["aldarrikatu","reivindicar / proclamar"],["gauzatu","llevar a cabo / realizar"],["bultzatu","impulsar / empujar / fomentar"],["ezkutatu","esconder / ocultar"],["egiaztatu","comprobar / verificar"]],
+  "Izenondoak":[["azkarra","listo / rápido / inteligente"],["alferra","vago / perezoso"],["zintzoa","honrado / formal"],["lasaia","tranquilo"],["urduria","nervioso"],["apala","humilde"],["zikina","sucio"],["garbia","limpio"],["astuna","pesado"],["arina","ligero"],["harroa","orgulloso / creído"],["polita","bonito / guapo"],["zaila","difícil"],["erraza","fácil"],["nekatuta","cansado"],["zuhurra","prudente / sensato"],["ausarta","valiente / atrevido"],["lotsatia","tímido / vergonzoso"],["zorrotza","estricto / riguroso / afilado"],["xumea","sencillo / modesto"],["arduratsua","responsable"],["maltzurra","astuto / malicioso / pícaro"],["ezinbestekoa","imprescindible / indispensable"]],
+  "Janaria":[["ogia","el pan"],["gazta","el queso"],["sagarra","la manzana"],["haragia","la carne"],["arraina","el pescado / el pez"],["babarrunak","las alubias"],["gatza","la sal"],["arrautza","el huevo"],["esnea","la leche"],["garagardoa","la cerveza"],["ura","el agua"],["ardoa","el vino"]],
+  "Denbora":[["atzo","ayer"],["bihar","mañana"],["etzi","pasado mañana"],["herenegun","anteayer"],["hilabetea","el mes"],["arratsaldea","la tarde"],["egunsentia","el amanecer"],["ilunabarra","el anochecer / el atardecer"],["astea","la semana"],["goiza","la mañana"],["gaua","la noche"],["eguna","el día"]],
+  "Lokailuak":[["hala ere","sin embargo / aun así"],["beraz","por lo tanto / entonces / así que"],["gainera","además"],["izan ere","de hecho / es que"],["bestela","si no / de lo contrario"],["behintzat","al menos / por lo menos"],["agian / beharbada / akaso","quizás / tal vez / a lo mejor"],["oraindik","todavía / aún"],["dagoeneko / jada","ya"],["berriz","en cambio / de nuevo / otra vez"],["berehala","enseguida / inmediatamente"],["nahiz eta","aunque / a pesar de que"],["bestalde","por otra parte / por otro lado"],["hots","es decir / o sea"],["nolanahi ere","de todos modos / en cualquier caso"],["alabaina","sin embargo / no obstante"],["are gehiago","más aún / es más"],["horrenbestez","por consiguiente / por lo tanto"]],
+  "Abstraktuak":[["ohitura","la costumbre / el hábito"],["gertakaria","el suceso / el acontecimiento"],["ondorioa","la consecuencia / la conclusión"],["arrazoia","la razón / el motivo"],["baldintza","la condición"],["eztabaida","la discusión / el debate"],["aukera","la oportunidad / la opción"],["helburua","el objetivo / la meta"],["jarrera","la actitud / la postura"],["iritzia","la opinión"],["zalantza","la duda"],["konponbidea","la solución"],["aurrekaria","el precedente / el antecedente"],["ahalegina","el esfuerzo"],["atsekabea","el disgusto / la aflicción"],["lehia","la competición / la rivalidad"],["oinarria","la base / el fundamento"],["begirunea","el respeto / la consideración"]]
+};
+const BASE_ESAERAK = [
+  ["Ezina ekinez egina","Lo imposible se consigue insistiendo.","ekinez"],
+  ["Nolako egurra, halako ezpala","De tal palo, tal astilla.","ezpala"],
+  ["Izena duenak izana du","Lo que tiene nombre, existe.","izana"],
+  ["Ez dago txarrik onik ez dakarrenik","No hay mal que por bien no venga.","txarrik"],
+  ["Hitzak haizeak daramatza","Las palabras se las lleva el viento.","haizeak"],
+  ["Hobe berandu inoiz ez baino","Más vale tarde que nunca.","berandu"],
+  ["Txakur zaunkaria, gutxi hozkari","Perro ladrador, poco mordedor.","zaunkaria"],
+  ["Gosea, saldarik onena","El hambre es la mejor salsa.","Gosea"],
+  ["Ur handitan arrain handiak","En aguas grandes, peces grandes.","arrain"],
+  ["Mendia mendiarekin ez da elkartzen, baina gizona gizonarekin bai","Los montes no se juntan, pero las personas sí (siempre nos volvemos a encontrar).","elkartzen"],
+  ["Begiak ikusten ez duena, bihotzak ez du sentitzen","Ojos que no ven, corazón que no siente.","bihotzak"],
+  ["Nolako aita, halako semea","De tal padre, tal hijo.","semea"],
+  ["Esan eta egin","Dicho y hecho.","egin"],
+  ["Ikusi eta ikasi","Mira y aprende.","ikasi"],
+  ["Zaharrak berri","Otra vez lo mismo (lo viejo vuelve a ser nuevo).","berri"],
+  ["Ahoa bete hortz geratu","Quedarse con la boca abierta (de asombro).","hortz"],
+  ["Bost axola","Me importa un comino.","axola"],
+  ["Buruz ikasi","Aprender de memoria.","Buruz"],
+  ["Aho batez","Por unanimidad (todos de acuerdo).","batez"],
+  ["Hobe da eskuko txoria, airean dauden bi baino","Más vale pájaro en mano que ciento volando.","txoria"],
+  ["Urrutiko intxaurrak hamalau, hurbildu eta lau","De lejos todo parece mejor de lo que es (las nueces de lejos son catorce y, al acercarte, cuatro).","intxaurrak"]
+];
+/* Zailtasun-maila: 1=A1 … 5=C1 */
+const MAILA_NAMES=["","A1 · Hasiera","A2 · Oinarria","B1 · Erdi-maila","B2 · Aurreratua","C1 · Gaitasuna"];
+const LVL={};
+[[1,"sukaldea logela komuna leihoa atea giltza ohea mahaia etxea aulkia mendia euria elurra haizea zuhaitza itsasoa poza ikasi eskatu polita zaila erraza ogia gazta sagarra arrautza esnea ura ardoa atzo bihar astea goiza gaua eguna garbia zikina"],
+ [2,"teilatua eskailerak ispilua ibaia hodeia hondartza basoa hostoa tristura beldurra haserrea maitasuna mina ahaztu gogoratu aurkitu galdu itxaron lagundu ulertu utzi lasaia urduria astuna arina haragia arraina babarrunak gatza garagardoa etzi herenegun hilabetea arratsaldea beraz gainera oraindik"],
+ [3,"ekaitza lainoa tximista lotsa harrotasuna zoriona irakatsi saiatu lortu erabaki konpondu azkarra alferra zintzoa apala harroa egunsentia ilunabarra behintzat bestela berriz izan_ere hala_ere"],
+ [4,"errukia ezinegona irrika garatu baieztatu ukatu onartu saihestu iradoki nabarmendu harritu nekatuta zuhurra ausarta lotsatia berehala nahiz_eta bestalde hots ohitura gertakaria ondorioa arrazoia baldintza eztabaida aukera helburua jarrera iritzia"],
+ [5,"zehaztu aldarrikatu gauzatu bultzatu ezkutatu egiaztatu zorrotza xumea arduratsua maltzurra ezinbestekoa nolanahi_ere alabaina are_gehiago horrenbestez zalantza konponbidea aurrekaria ahalegina atsekabea lehia oinarria begirunea"]
+].forEach(([l,str])=>str.split(" ").forEach(w=>LVL[w.replace(/_/g," ")]=l));
+const ES_LVL=[4,3,4,4,3,2,3,3,4,5,3,2,1,1,4,4,2,2,3,4,5];
+const DEFAULT_ITEMS = [];
+for (const [cat, list] of Object.entries(BASE_WORDS)) list.forEach(([eu,es],i)=>DEFAULT_ITEMS.push({id:"b-"+cat+"-"+i,eu,es,cat,type:"word",maila:LVL[alts(eu)[0]]||(eu.startsWith("dagoeneko")||eu.startsWith("agian")?2:2)}));
+BASE_ESAERAK.forEach(([eu,es,gap],i)=>DEFAULT_ITEMS.push({id:"e-"+i,eu,es,cat:"Esaerak",type:"esaera",gap,maila:ES_LVL[i]||3}));
+
+/* ---------- ESTADO ---------- */
+const KEY="hitzjoko-v1";
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.prog)return s}catch(e){}return null}
+let S = load() || {mine:[],prog:{},xp:0,streak:0,lastDay:null,dir:"eu",cat:"all",best:0};
+S.stats=S.stats||{};S.lvl=S.lvl||1;S.medals=S.medals||{};if(S.sound===undefined)S.sound=true;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let DAILY=[], DBX=null; /* DAILY se llena desde el banco local */
+const items=()=>DEFAULT_ITEMS.concat(DAILY,S.mine);
+const words=()=>items().filter(i=>i.type==="word");
+const esaerak=()=>items().filter(i=>i.type==="esaera");
+const P=id=>S.prog[id]||(S.prog[id]={box:0,r:0,w:0});
+const today=()=>new Date().toISOString().slice(0,10);
+function touchStreak(){
+  const t=today(); if(S.lastDay===t) return;
+  const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  S.streak = S.lastDay===y ? S.streak+1 : 1; S.lastDay=t;
+}
+function mark(it,ok){const p=P(it.id); p.ok=ok; if(ok){p.r++;p.box=Math.min(5,p.box+1)} else {p.w++;p.box=Math.max(0,p.box-2)} p.last=Date.now()}
+const level=xp=>{let l=1,need=100,acc=0;while(xp>=acc+need){acc+=need;l++;need=Math.round(need*1.25)}return{l,cur:xp-acc,need}};
+const LEVEL_NAMES=["Hasiberria","Ikaslea","Hiztuna","Bertsolari gaztea","Euskalduna","Hizkuntz maisua"];
+
+/* ---------- UTIL ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ic=(n,c="")=>`<svg class="${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-zñ0-9 ]/g,"").replace(/\s+/g," ").trim();
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2000)}
+function pool(type){
+  let list = (type==="esaera"?esaerak():words()).filter(i=>i.mine||i.day||(i.maila||1)<=S.lvl+(type==="esaera"?1:0));
+  if(type!=="esaera"){
+    if(S.cat==="mine") list=list.filter(i=>i.mine);
+    else if(S.cat==="today") list=list.filter(i=>i.day===today());
+    else if(S.cat==="daily") list=list.filter(i=>i.day);
+    else if(S.cat!=="all") list=list.filter(i=>i.cat===S.cat);
+  }
+  return list;
+}
+/* repetición espaciada: priorizar cajas bajas */
+/* Solo se repiten las falladas: falladas primero, luego nuevas; las acertadas solo si no queda nada */
+function status(it){const p=S.prog[it.id];if(!p||p.r+p.w===0)return"new";const ok=p.ok!==undefined?p.ok:p.box>=1;return ok?"ok":"fail"}
+function pick(list,n){
+  const fails=shuffle(list.filter(i=>status(i)==="fail")), fresh=shuffle(list.filter(i=>status(i)==="new")).sort((a,b)=>(b.maila||0)-(a.maila||0));
+  let out=fails.slice(0,Math.ceil(n*.6)).concat(fresh).concat(fails.slice(Math.ceil(n*.6))).slice(0,n);
+  if(out.length<n){const done=list.filter(i=>status(i)==="ok").sort((a,b)=>(P(a.id).last||0)-(P(b.id).last||0));out=out.concat(done.slice(0,n-out.length))}
+  return shuffle(out);
+}
+function pending(list){return{fail:list.filter(i=>status(i)==="fail").length,fresh:list.filter(i=>status(i)==="new").length}}
+
+/* ---------- NAV ---------- */
+let tab="home";
+function renderTabs(){
+  const T=[["home","Hasiera","home"],["words","Nire hitzak","plus"],["prog","Aurrerapena","chart"]];
+  $("#tabs").innerHTML=T.map(([k,l,i])=>`<button data-tab="${k}" ${tab===k?'aria-current="page"':""}>${ic(i)}${l}</button>`).join("");
+  $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();window.scrollTo(0,0)});
+}
+function render(){renderTabs();({home:renderHome,words:renderWords,prog:renderProg})[tab]();const b=$("#snd");if(b)b.onclick=()=>{S.sound=!S.sound;save();if(S.sound)SFX.ok();render()}}
+
+function topBar(){
+  return `<header class="top"><div class="brand"><svg style="color:var(--accent)"><use href="#lauburu"/></svg><h1>Hitz Jokoa</h1></div>
+  <span class="pill" title="Racha de días" style="color:var(--gold)">${ic("flame")}<span style="color:var(--ink)">${S.streak}</span></span>
+  <span class="pill" title="Puntos" style="color:var(--accent)">${ic("star")}<span style="color:var(--ink)">${S.xp}</span></span>
+  <button class="pill snd" id="snd" aria-label="${S.sound?"Silenciar":"Activar sonido"}">${ic(S.sound?"sound":"mute")}</button></header>`;
+}
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  const L=level(S.xp);
+  const cats=[["all","Guztiak",words().length]].concat(Object.keys(BASE_WORDS).map(c=>[c,c,words().filter(w=>w.cat===c).length]));
+  const extraCats=[...new Set(words().filter(m=>!BASE_WORDS[m.cat]).map(m=>m.cat))];
+  extraCats.forEach(c=>cats.push([c,c,words().filter(w=>w.cat===c).length]));
+  if(S.mine.some(m=>m.type==="word")) cats.splice(1,0,["mine","Nire hitzak",S.mine.filter(m=>m.type==="word").length]);
+  const todayN=DAILY.filter(d=>d.day===today()).length;
+  if(DAILY.length) cats.splice(1,0,["daily","Egunekoak",DAILY.length]);
+  if(todayN) cats.splice(1,0,["today","Gaurkoak",todayN]);
+  $("#app").innerHTML = topBar()+`
+  ${(()=>{const p=lvlProgress();return `<section class="level">
+    <div class="level-row"><strong>${MAILA_NAMES[S.lvl]}</strong><span class="sub">${S.lvl<5?`${p.ok}/${p.need} para subir`:"Nivel máximo"}</span></div>
+    <div class="bar"><i style="width:${S.lvl<5?Math.min(100,Math.round(p.ok/p.need*100)):100}%"></i></div>
+    <div class="lvls" id="lvls">${[1,2,3,4,5].map(l=>`<button class="lv${l===S.lvl?" cur":""}${l<S.lvl?" done":""}" data-l="${l}" aria-pressed="${l===S.lvl}">${MAILA_NAMES[l].split(" ")[0]}</button>`).join("")}</div>
+    <div class="level-row"><span class="sub">${ic("star")} ${L.l}. jokalari-maila · ${LEVEL_NAMES[Math.min(L.l-1,LEVEL_NAMES.length-1)]}</span><span class="sub">${L.cur}/${L.need} XP</span></div>
+  </section>`})()}
+  ${todayN?(()=>{const tw=DAILY.filter(d=>d.day===today());const pd=pending(tw);return `<button class="newday" id="newday"><div><b>${todayN} hitz berri gaur</b><span>${pd.fresh?`${pd.fresh} sin estrenar`:"Todas vistas"}${pd.fail?` · ${pd.fail} falladas`:""} · quedan ${bankLeft()} en el banco · ${esc(tw.slice(0,4).map(w=>alts(w.eu)[0]).join(", "))}…</span></div><em>Jolastu</em></button>`})():(!bankLeft()?`<p class="sub" style="margin:0">Has desbloqueado todo el banco de palabras. Pídeme en el chat que añada más y las meto en la app.</p>`:"")}
+  <section style="display:flex;flex-direction:column;gap:10px">
+    <div class="eyebrow">Gaia · Tema</div>
+    <div class="chips" id="cats">${cats.map(([k,l,n])=>`<button class="chip" data-cat="${esc(k)}" aria-pressed="${S.cat===k}">${esc(l)}<small>${n}</small></button>`).join("")}</div>
+    ${(()=>{const pd=pending(pool("word"));return `<p class="sub" style="margin:0">${pd.fail||pd.fresh?`Te quedan <b style="color:var(--red)">${pd.fail} falladas</b> y <b>${pd.fresh} nuevas</b>. Las que aciertas ya no vuelven a salir.`:`<b style="color:var(--accent)">Guztiak ikasita!</b> Has acertado todas las de este tema: ahora repasarás las más antiguas.`}</p>`})()}
+    <div class="seg" id="dir">
+      <button data-dir="eu" aria-pressed="${S.dir==="eu"}">Euskara → Castellano</button>
+      <button data-dir="es" aria-pressed="${S.dir==="es"}">Castellano → Euskara</button>
+    </div>
+  </section>
+  <section class="modes">
+    <button class="mode hero champ" data-mode="surv"><span class="ic">${ic("crown")}</span><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>Txapelketa</b><span>Sin fin y cada vez más rápido. 3 vidas, multiplicador por racha y comodines. ¿Hasta dónde llegas?</span><span class="rec">Errekorra: ${S.survBest||0} puntu</span></div></button>
+    ${(()=>{const d=(S.daily||{})[today()];return `<button class="mode daily${d?" done":""}" data-mode="daily" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:14px;min-height:0"><span class="ic">${ic(d?"check":"cal")}</span><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>Eguneko erronka</b><span>${d?`Hecho hoy: ${d.right}/10 · ${d.score} puntos. Mañana, otras 10.`:`10 palabras del día de tu nivel. Un solo intento que puntúa.`}</span></div></button>`})()}
+    <div class="mode" style="grid-column:1/-1;gap:12px">
+      <button data-mode="write" style="display:flex;align-items:center;gap:14px;text-align:left;color:inherit"><span class="ic">${ic("clock")}</span><div style="display:flex;flex-direction:column;gap:2px"><b>Erlojupean</b><span>10 palabras contrarreloj. Vale cualquier significado correcto.</span></div></button>
+      <div class="seg" id="secs">${[5,10,15].map(n=>`<button data-s="${n}" aria-pressed="${(S.secs||10)===n}">${n} s</button>`).join("")}</div>
+    </div>
+    <button class="mode" data-mode="quiz"><span class="ic">${ic("bolt")}</span><b>Azkar!</b><span>Elige la traducción entre 4 opciones.</span></button>
+    <button class="mode" data-mode="cards"><span class="ic">${ic("cards")}</span><b>Txartelak</b><span>Tarjetas para repasar a tu ritmo.</span></button>
+    <button class="mode" data-mode="esaera" style="grid-column:1/-1"><span class="ic">${ic("quote")}</span><b>Esaerak</b><span>Completa refranes y expresiones y descubre su significado. ${esaerak().length} en total.</span></button>
+  </section>`;
+  $("#cats").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{S.cat=b.dataset.cat;save();renderHome()});
+  $("#dir").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.dir=b.dataset.dir;save();renderHome()});
+  $("#lvls").querySelectorAll("button").forEach(b=>b.onclick=()=>{const l=+b.dataset.l;if(l===S.lvl)return;S.lvl=l;save();syncSettings();toast(`Nivel ${MAILA_NAMES[l]}`);renderHome()});
+  const nd=$("#newday"); if(nd) nd.onclick=()=>{S.cat="today";save();start("write")};
+  $("#secs").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.secs=+b.dataset.s;save();renderHome()});
+  document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>start(b.dataset.mode));
+  const sel=$(`.chip[aria-pressed="true"]`); if(sel) sel.scrollIntoView({inline:"center",block:"nearest"});
+}
+
+/* ---------- JUEGO ---------- */
+let G=null;
+function start(mode){
+  if(mode==="write"||mode==="surv"||mode==="daily") return startTyped(mode);
+  const type=mode==="esaera"?"esaera":"word";
+  const list=pool(type);
+  const minN = mode==="cards"||mode==="write"?1:4;
+  if(list.length<minN){toast(type==="esaera"?"Añade al menos 4 esaerak":"Esta categoría necesita al menos 4 palabras");return}
+  const n = mode==="cards"?Math.min(15,list.length):Math.min(10,list.length);
+  G={mode,list,qs:pick(list,n),i:0,hearts:3,combo:0,xp:0,right:0,missed:[]};
+  touchStreak(); save(); renderGame();
+}
+function closeGame(){cancelAnimationFrame(timerRAF);document.querySelectorAll(".bonus").forEach(b=>b.remove());G=null;$("#layer").innerHTML="";render()}
+function shell(inner){
+  const pct=Math.round(G.i/G.qs.length*100);
+  G.fast=G.fast||0;
+  const hearts = G.mode!=="cards" ? `<div class="hearts" aria-label="${G.hearts} vidas">${[0,1,2].map(k=>ic("heart",k<G.hearts?"":"off")).join("")}</div>`:`<span class="sub" style="font-variant-numeric:tabular-nums">${G.i+1}/${G.qs.length}</span>`;
+  $("#layer").innerHTML=`<div class="game"><div class="game-in">
+    <div class="ghead"><button class="x" id="quit" aria-label="Salir">${ic("x")}</button><div class="bar"><i style="width:${pct}%"></i></div>${hearts}</div>
+    <div class="combo">${G.combo>=3?`${G.combo} segidan!`:""}</div>
+    <div id="prompt" style="position:relative;display:contents"></div>${inner}</div></div>`;
+  $("#quit").onclick=closeGame;
+}
+function renderGame(){
+  if(G.i>=G.qs.length||G.hearts<=0) return endGame();
+  if(G.mode==="quiz"&&G.verbNext&&G.hearts>0){const v=G.verbNext;G.verbNext=null;return verbTest(v,()=>renderGame())}
+  if(G.mode==="quiz"&&(S.esCount||0)>=ES_EVERY&&pool('esaera').length>=4) return esaeraBonus(()=>renderGame());
+  ({quiz:qQuiz,esaera:qEsaera,cards:qCard})[G.mode]();
+}
+function award(ok,it){
+  mark(it,ok);
+  if(G.mode==="quiz"&&hasVT(it)) G.verbNext=it;
+  if(ok){G.combo++;G.right++;const g=10+Math.min(G.combo,5)*2;G.xp+=g;S.best=Math.max(S.best,G.combo);S.stats.correct=(S.stats.correct||0)+1;if(G.mode==='quiz')S.esCount=(S.esCount||0)+1;SFX.ok();popup("+"+g);if(G.combo===5||G.combo===10)confetti(50)}
+  else{G.combo=0;G.missed.push(it);SFX.bad();buzz(100);if(G.mode!=="cards")G.hearts--;requeue(it)}
+  save();
+}
+function feedback(ok,title,body,ex){
+  const box=document.createElement("div");
+  box.className="sheet "+(ok?"ok":"bad");
+  const it=G.qs[G.i];
+  box.innerHTML=`<h3>${title}</h3>${body?`<p>${body}</p>`:""}${ex?`<p class="ex">${ex}</p>`:""}${!ok?`<p class="expl" hidden></p>`:(it&&it.nota?`<p class="expl"><b>Azalpena</b> ${esc(it.nota)}</p>`:"")}<button class="big" id="next">Jarraitu</button>`;
+  $(".game-in").appendChild(box);
+  const n=$("#next"); n.focus(); n.onclick=()=>{if(n.disabled)return;G.i++;renderGame()};
+  if(!ok&&it&&G.mode!=="cards"){explainInto(box.querySelector(".expl"),it,"");holdButton(n)}
+}
+const OK_MSG=["Oso ondo!","Bikain!","Primeran!","Zuzen!","Hori da!"];
+const BAD_MSG=["Ez da hori","Ia-ia...","Hurrengoan!"];
+const rnd=a=>a[Math.random()*a.length|0];
+
+function qQuiz(){
+  const it=G.qs[G.i]; const toEs=S.dir==="eu";
+  const q=toEs?it.eu:it.es, ans=toEs?it.es:it.eu;
+  const distract=shuffle(G.list.filter(x=>x.id!==it.id&&!sharesMeaning(x,it))).slice(0,3).map(x=>toEs?x.es:x.eu);
+  const opts=shuffle([ans,...distract]);
+  shell(`<div class="prompt"><div class="eyebrow">${toEs?"Zer esan nahi du?":"Nola esaten da euskaraz?"}</div><div class="q">${esc(q)}</div><div class="sub">${esc(it.cat)}</div></div>
+  <div class="opts">${opts.map(o=>`<button class="opt">${esc(o)}</button>`).join("")}</div>`);
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const ok=b.textContent===ans;
+    document.querySelectorAll(".opt").forEach(o=>{o.disabled=true;if(o.textContent===ans)o.classList.add("ok")});
+    if(!ok)b.classList.add("bad");
+    award(ok,it);
+    $(".opts").remove();
+    feedback(ok,ok?rnd(OK_MSG):rnd(BAD_MSG),`<b>${esc(it.eu)}</b> = ${esc(it.es)}`,it.ex?esc(it.ex):"");
+  });
+}
+function qEsaera(){
+  const it=G.qs[G.i];
+  const askMeaning = Math.random()<.4 || !it.gap;
+  if(askMeaning){
+    const opts=shuffle([it.es,...shuffle(G.list.filter(x=>x.id!==it.id)).slice(0,3).map(x=>x.es)]);
+    shell(`<div class="prompt"><div class="eyebrow">Zer esan nahi du esaera honek?</div><div class="q long">«${esc(it.eu)}»</div></div>
+    <div class="opts">${opts.map(o=>`<button class="opt" style="font-size:16px">${esc(o)}</button>`).join("")}</div>`);
+    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      const ok=b.textContent===it.es;
+      document.querySelectorAll(".opt").forEach(o=>{o.disabled=true;if(o.textContent===it.es)o.classList.add("ok")});
+      if(!ok)b.classList.add("bad"); award(ok,it); $(".opts").remove();
+      feedback(ok,ok?rnd(OK_MSG):rnd(BAD_MSG),`<b>${esc(it.eu)}</b>`,esc(it.es));
+    });
+  } else {
+    const gapRe=new RegExp(`\\b${it.gap}\\b`);
+    const parts=it.eu.split(gapRe);
+    const others=shuffle(G.list.filter(x=>x.id!==it.id&&x.gap&&x.gap.toLowerCase()!==it.gap.toLowerCase())).slice(0,3).map(x=>x.gap.toLowerCase());
+    const opts=shuffle([it.gap.toLowerCase(),...others]);
+    shell(`<div class="prompt"><div class="eyebrow">Osatu esaera · Completa</div><div class="q long">«${esc(parts[0])}<span class="gap">&nbsp;?&nbsp;</span>${esc(parts.slice(1).join(it.gap))}»</div><div class="sub">${esc(it.es)}</div></div>
+    <div class="opts" style="grid-template-columns:1fr 1fr">${opts.map(o=>`<button class="opt">${esc(o)}</button>`).join("")}</div>`);
+    document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      const ok=b.textContent===it.gap.toLowerCase();
+      document.querySelectorAll(".opt").forEach(o=>{o.disabled=true;if(o.textContent===it.gap.toLowerCase())o.classList.add("ok")});
+      if(!ok)b.classList.add("bad"); award(ok,it); $(".opts").remove();
+      $(".q .gap").textContent=it.gap;
+      feedback(ok,ok?rnd(OK_MSG):rnd(BAD_MSG),`<b>${esc(it.eu)}</b>`,esc(it.es));
+    });
+  }
+}
+function qCard(){
+  const it=G.qs[G.i]; const front=S.dir==="eu"?it.eu:it.es, back=S.dir==="eu"?it.es:it.eu;
+  shell(`<div class="card-wrap"><div class="fcard" id="fc" role="button" tabindex="0" aria-label="Girar tarjeta">
+    <div class="face"><div class="eyebrow">${esc(it.cat)}</div><div class="w">${esc(front)}</div><div class="tap">Toca para girar</div></div>
+    <div class="face back"><div class="w">${esc(back)}</div>${it.ex?`<div class="exb">${esc(it.ex)}</div>`:""}<div class="dots" title="Nivel">${[1,2,3,4,5].map(k=>`<i class="${P(it.id).box>=k?"on":""}"></i>`).join("")}</div></div>
+  </div></div>
+  <div class="row2"><button class="big ghost" id="no">Ez dakit</button><button class="big" id="yes">Badakit</button></div>`);
+  const fc=$("#fc"); const flip=()=>fc.classList.toggle("flip");
+  fc.onclick=flip; fc.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}};
+  const go=ok=>{award(ok,it);G.i++;renderGame()};
+  $("#no").onclick=()=>go(false); $("#yes").onclick=()=>go(true);
+}
+/* ---- significados múltiples ---- */
+const ART=/^(el|la|los|las|lo|un|una|unos|unas)\s+/;
+const keyEs=s=>norm(s).replace(ART,"");
+const keyEu=s=>norm(s);
+function euEq(a,b){a=keyEu(a);b=keyEu(b);return a===b||a+"a"===b||a===b+"a"||a+"ak"===b||a===b+"ak"}
+function esEq(a,b){return keyEs(a)===keyEs(b)}
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+/* todas las respuestas válidas: incluye otras palabras que comparten significado */
+function accepted(it,toEs){
+  const all=words();
+  if(toEs){const E=alts(it.eu);return [...new Set(all.filter(w=>alts(w.eu).some(x=>E.some(e=>euEq(x,e)))).flatMap(w=>alts(w.es)))]}
+  const M=alts(it.es);return [...new Set(all.filter(w=>alts(w.es).some(x=>M.some(m=>esEq(x,m)))).flatMap(w=>alts(w.eu)))]
+}
+const sharesMeaning=(a,b)=>alts(a.es).some(x=>alts(b.es).some(y=>esEq(x,y)))||alts(a.eu).some(x=>alts(b.eu).some(y=>euEq(x,y)));
+function check(input,list,toEs){
+  const eq=toEs?esEq:euEq; const hit=list.find(a=>eq(input,a)); if(hit) return {ok:true,hit,typo:false};
+  const k=toEs?keyEs:keyEu; const v=k(input);
+  const near=list.find(a=>{const t=k(a);return t.length>=5&&lev(v,t)<=1});
+  return near?{ok:true,hit:near,typo:true}:{ok:false};
+}
+let timerRAF=null;
+/* ---------- SONIDO Y EFECTOS ---------- */
+let AC=null;
+function beep(notes,type="sine",vol=.12){
+  if(S.sound===false) return;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
+    let t=AC.currentTime;
+    notes.forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
+      g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d);t+=d*.8});
+  }catch(e){}
+}
+const SFX={
+  ok:()=>beep([[660,.09],[990,.16]],"triangle"),
+  bad:()=>beep([[180,.22]],"square",.06),
+  tick:()=>beep([[1200,.04]],"sine",.05),
+  up:()=>beep([[523,.1],[659,.1],[784,.1],[1047,.25]],"triangle"),
+  freeze:()=>beep([[1500,.08],[1800,.08],[2100,.14]],"sine",.07)
+};
+function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}}
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function confetti(n=90){
+  if(RM) return;
+  const c=document.createElement("canvas");c.className="fx";document.body.appendChild(c);
+  const x=c.getContext("2d"),W=c.width=innerWidth*devicePixelRatio,H=c.height=innerHeight*devicePixelRatio;
+  const cs=getComputedStyle(document.documentElement);
+  const cols=["--accent","--gold","--red","--ink"].map(v=>cs.getPropertyValue(v).trim());
+  const ps=Array.from({length:n},()=>({x:W/2+(Math.random()-.5)*W*.3,y:H*.45,vx:(Math.random()-.5)*W*.022,vy:-Math.random()*H*.022-H*.006,r:Math.random()*Math.PI,s:(6+Math.random()*7)*devicePixelRatio,c:cols[Math.random()*4|0]}));
+  const t0=performance.now();
+  (function f(now){x.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=H*.0007;p.x+=p.vx;p.y+=p.vy;p.r+=.2;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()});
+    if(now-t0<2600)requestAnimationFrame(f);else c.remove()})(t0);
+}
+function popup(txt,cls=""){
+  const el=document.createElement("div");el.className="pop "+cls;el.textContent=txt;
+  const host=$("#prompt")||$(".game-in"); if(!host) return; host.appendChild(el); setTimeout(()=>el.remove(),1000);
+}
+function flash(txt){
+  const el=document.createElement("div");el.className="banner";el.innerHTML=txt;
+  (document.querySelector(".game")||document.body).appendChild(el);setTimeout(()=>el.remove(),1500);
+}
+
+/* ---------- MODOS ESCRITOS (contrarreloj, txapelketa, reto diario) ---------- */
+const multOf=c=>Math.min(4,1+Math.floor(c/3));
+function seeded(seed){let h=1779033703^seed.length;for(let i=0;i<seed.length;i++){h=Math.imul(h^seed.charCodeAt(i),3432918353);h=h<<13|h>>>19}
+  return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return((h^=h>>>16)>>>0)/4294967296}}
+function dailyWords(){const r=seeded("hitz-"+today()+"-"+S.lvl);const l=DEFAULT_ITEMS.filter(i=>i.type==="word"&&i.maila<=S.lvl).slice();
+  for(let i=l.length-1;i>0;i--){const j=r()*(i+1)|0;[l[i],l[j]]=[l[j],l[i]]}return l.slice(0,10)}
+function dailyDir(){return seeded("dir-"+today())()<.5?"eu":"es"}
+const survSecs=r=>Math.max(4,(13-S.lvl)-r*.4);
+
+function startTyped(mode){
+  const list = mode==="daily"?dailyWords():pool("word");
+  if(!list.length){toast("Esta categoría no tiene palabras");return}
+  const n = mode==="surv"?Infinity:Math.min(10,list.length);
+  G={mode,list,qs:mode==="surv"?[]:(mode==="daily"?list:pick(list,n)),total:n,i:0,hearts:3,combo:0,xp:0,right:0,missed:[],freeze:1,fast:0,
+     dir: mode==="daily"?dailyDir():S.dir};
+  touchStreak(); save();
+  $("#layer").innerHTML=`<div class="game"><div class="game-in">
+    <div class="ghead"><button class="x" id="quit" aria-label="Salir">${ic("x")}</button><div id="hudmid" style="flex:1;min-width:0"></div><div class="hearts" id="hearts"></div></div>
+    <div class="combo" id="combo"></div>
+    <div class="prompt" id="prompt"><div class="eyebrow" id="qeye"></div><div class="q" id="q"></div><div class="clock" id="clock"></div><div class="hint" id="hint"></div></div>
+    <div class="tbar"><i id="tb"></i></div>
+    <div id="fb"></div>
+    <form id="wf" style="display:flex;flex-direction:column;gap:10px" autocomplete="off">
+      <div class="powers"><button type="button" class="pw" id="pw-freeze">${ic("snow")}<span>Izoztu</span><em id="fz">1</em></button><button type="button" class="pw" id="pw-hint">${ic("eye")}<span>Pista</span><em>−5</em></button><button type="button" class="pw" id="pw-skip">${ic("skip")}<span>Pasa</span><em>♥</em></button></div>
+      <input class="inp" id="win" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" enterkeyhint="go">
+      <button class="big" type="submit" id="go">Egiaztatu</button>
+    </form></div></div>`;
+  $("#quit").onclick=closeGame;
+  $("#wf").onsubmit=e=>{e.preventDefault(); if(G.phase==="fb"){if(Date.now()<(G.waitUntil||0))return;return nextTyped()} if(!$("#win").value.trim()) return; finishTyped(false)};
+  $("#pw-freeze").onclick=()=>{if(G.phase!=="ask"||G.freeze<1||G.frozen)return;G.freeze--;G.frozen=5;SFX.freeze();flash("Izoztuta! · +5 s");$("#tb").classList.add("ice");$("#clock").classList.add("ice");updHud();$("#win").focus()};
+  $("#pw-hint").onclick=()=>{if(G.phase!=="ask")return;const a=G.ans[0];G.hints=Math.min(a.length,G.hints+1);G.combo=0;G.xp=Math.max(0,G.xp-5);
+    $("#hint").textContent=a.split("").map((c,k)=>c===" "?" ":(k<G.hints?c:"_")).join("");updHud();$("#win").focus()};
+  $("#pw-skip").onclick=()=>{if(G.phase==="ask")finishTyped(true,true)};
+  nextTyped(true);
+}
+function updHud(){
+  const mid=$("#hudmid"); if(!mid) return;
+  if(G.mode==="surv") mid.innerHTML=`<div class="score"><b>${G.xp}</b><span>puntos · récord ${S.survBest||0}</span></div>`;
+  else mid.innerHTML=`<div class="bar"><i style="width:${Math.round(G.i/G.total*100)}%"></i></div>`;
+  $("#hearts").innerHTML=[0,1,2].map(k=>ic("heart",k<G.hearts?"":"off")).join("");
+  const m=multOf(G.combo);
+  $("#combo").innerHTML=G.combo>=2?`<span class="mult m${m}">x${m}</span> ${G.combo} segidan${G.combo>=5?" · su bizia!":""}`:"";
+  $("#combo").innerHTML+=`<div class="esprog">${ic("quote")} Esaera bonusa ${Math.min(S.esCount||0,ES_EVERY)}/${ES_EVERY}</div>`;
+  $("#fz").textContent=G.freeze; $("#pw-freeze").disabled=G.freeze<1;
+}
+function nextTyped(first){
+  if(!first) G.i++;
+  if(G.hearts>0&&G.verbNext){const v=G.verbNext;G.verbNext=null;cancelAnimationFrame(timerRAF);G.phase="bonus";$("#win").readOnly=true;return verbTest(v,()=>{$("#win").readOnly=false;nextTyped(true)})}
+  if(G.hearts<=0 || G.i>=G.total) return endGame();
+  if((S.esCount||0)>=ES_EVERY && pool('esaera').length>=4){cancelAnimationFrame(timerRAF);G.phase="bonus";$("#win").readOnly=true;return esaeraBonus(()=>{$("#win").readOnly=false;nextTyped(true)})}
+  if(G.mode==="surv"){
+    const r=(G.retry||[]).findIndex(x=>x.due<=G.i);
+    if(r>=0){G.qs.push(G.retry.splice(r,1)[0].it)}
+    else{const recent=G.qs.slice(-6).map(x=>x.id);G.okIds=G.okIds||{};
+      let c=G.list.filter(x=>!recent.includes(x.id)&&!G.okIds[x.id]&&status(x)!=="ok");
+      if(!c.length){c=G.list.filter(x=>!recent.includes(x.id)&&!G.okIds[x.id]);if(!G.allDone){G.allDone=1;setTimeout(()=>flash("Guztiak ikasita!<small>Ahora repasas las más antiguas</small>"),300)}}
+      if(!c.length)c=G.list.filter(x=>!recent.includes(x.id));if(!c.length)c=G.list;
+      G.qs.push(pick(c,1)[0])}}
+  const it=G.qs[G.i]; const toEs=G.dir==="eu";
+  G.cur=it; G.ans=accepted(it,toEs); G.phase="ask"; G.hints=0; G.frozen=0;
+  G.secs = G.mode==="surv"?survSecs(G.right):G.mode==="daily"?10:(S.secs||10);
+  const q=toEs?it.eu:it.es;
+  $("#qeye").textContent=toEs?"Idatzi gaztelaniaz · Escribe en castellano":"Idatzi euskaraz · Escribe en euskera";
+  const qe=$("#q"); qe.textContent=q; qe.className="q pop-in"+(q.length>18?" long":"");
+  $("#hint").textContent=""; $("#fb").innerHTML="";
+  const inp=$("#win"); inp.value=""; inp.readOnly=false; inp.placeholder=toEs?"Tu respuesta…":"Zure erantzuna…"; inp.className="inp";
+  $("#go").textContent="Egiaztatu"; document.querySelector(".powers").hidden=false;
+  $("#tb").classList.remove("ice","warn"); $("#clock").classList.remove("ice","warn");
+  updHud(); inp.focus();
+  G.left=G.secs; let last=performance.now(), lastSec=Math.ceil(G.secs);
+  cancelAnimationFrame(timerRAF);
+  const tick=now=>{
+    if(!G||G.phase!=="ask") return;
+    const dt=(now-last)/1000; last=now;
+    if(G.frozen>0){G.frozen-=dt; if(G.frozen<=0){$("#tb").classList.remove("ice");$("#clock").classList.remove("ice")}}
+    else G.left-=dt;
+    const left=Math.max(0,G.left);
+    $("#tb").style.width=(left/G.secs*100)+"%"; const s=Math.ceil(left); $("#clock").textContent=s;
+    const warn=left<=3&&G.frozen<=0; $("#tb").classList.toggle("warn",warn); $("#clock").classList.toggle("warn",warn);
+    if(warn&&s<lastSec) SFX.tick(); lastSec=s;
+    if(left<=0) return finishTyped(true);
+    timerRAF=requestAnimationFrame(tick)};
+  timerRAF=requestAnimationFrame(tick);
+}
+function finishTyped(timeout,skipped){
+  if(G.phase!=="ask") return; G.phase="fb"; cancelAnimationFrame(timerRAF);
+  const it=G.cur, toEs=G.dir==="eu", inp=$("#win"), used=G.secs-G.left;
+  const r=timeout?{ok:false}:check(inp.value,G.ans,toEs);
+  mark(it,r.ok);
+  if(hasVT(it)) G.verbNext=it;
+  const q=toEs?it.eu:it.es;
+  const list=`<span class="sub">${G.ans.length>1?"Respuestas válidas":"Respuesta"}:</span> ${G.ans.map(a=>`<span class="tag${r.hit===a?" hit":""}">${esc(a)}</span>`).join(" ")}`;
+  let title,body,gain=0;
+  if(r.ok){
+    G.combo++; G.right++; S.best=Math.max(S.best,G.combo); if(G.mode==='surv'){G.okIds=G.okIds||{};G.okIds[it.id]=1}
+    S.stats.correct=(S.stats.correct||0)+1; S.esCount=(S.esCount||0)+1;
+    if(used<2&&!G.hints){G.fast++;S.stats.fast=(S.stats.fast||0)+1}
+    const m=multOf(G.combo); gain=(10+Math.round(Math.max(0,G.left)*2))*m; if(G.hints) gain=Math.round(gain/2);
+    G.xp+=gain; SFX.ok(); popup("+"+gain, m>1?"hot":"");
+    inp.className="inp good";
+    if(G.combo===5||G.combo===10||G.combo%15===0){confetti(60);SFX.up();flash(`${G.combo} segidan!<small>x${m} puntuak</small>`)}
+    if(G.mode==="surv"&&G.right%10===0){if(G.hearts<3){G.hearts++;setTimeout(()=>flash("Bizitza bat gehiago! ♥"),400)} else setTimeout(()=>flash(`${G.right}! Abiadura gehiago`),400)}
+    title=r.typo?"Ia perfektua!":(used<2?"Tximista!":rnd(OK_MSG));
+    body=(r.typo?`Se escribe <b>${esc(r.hit)}</b>. `:"")+(G.ans.length>1?list:"")+`<br><span class="sub">${used.toFixed(1)} s · +${gain} puntos</span>`;
+  } else {
+    G.combo=0; G.hearts--; G.missed.push(it); SFX.bad(); buzz(120);
+    if(G.mode==='surv'){G.retry=G.retry||[];G.retry.push({it,due:G.i+3})} else requeue(it);
+    inp.className="inp wrong";
+    title=skipped?"Pasatuta":timeout?"Denbora amaitu!":rnd(BAD_MSG);
+    body=`<span class="right-ans">${esc(q)} = ${esc(G.ans[0])}</span>`+(timeout||skipped?"":`<span class="sub">Tú escribiste: <s>${esc(inp.value)}</s></span><br>`)+(G.ans.length>1?list:"");
+  }
+  save(); updHud();
+  inp.readOnly=true; document.querySelector(".powers").hidden=true;
+  $("#go").textContent=(G.hearts<=0||G.i+1>=G.total)?"Ikusi emaitza":"Jarraitu";
+  $("#fb").innerHTML=`<div class="sheet ${r.ok?"ok":"bad"} slim"><h3>${title}</h3><p>${body}</p>${it.ex?`<p class="ex">${esc(it.ex)}</p>`:""}${r.ok?(r.typo&&it.nota?`<p class="expl"><b>Azalpena</b> ${esc(it.nota)}</p>`:""):`<p class="expl" hidden></p>`}</div>`;
+  if(!r.ok){G.waitUntil=Date.now()+WAIT_MS;holdButton($("#go"));explainInto($("#fb .expl"),it,timeout||skipped?"":inp.value)}
+  if(r.ok&&G.hearts>0&&G.i+1<G.total){const id=G.i;setTimeout(()=>{if(G&&G.phase==="fb"&&G.i===id)nextTyped()},r.typo||G.ans.length>1?1700:900)}
+}
+
+function requeue(it){G.again=G.again||{};if(G.mode==='surv'||G.mode==='daily'||G.again[it.id])return;G.again[it.id]=1;G.qs.push(it);if(G.total!==undefined)G.total=G.qs.length}
+/* ---------- TEST DE VERBO: tras cada verbo, una frase para conjugar ---------- */
+const isVerb=it=>it&&it.type==="word"&&(it.cat==="Aditzak"||/(ar|er|ir)(se)?$/.test(alts(it.es)[0]||""));
+const vqBusy={};
+function prefetchVerb(it){
+  return Promise.resolve(hasVT(it)?buildVT(it):null);
+}
+function verbTest(it,done){
+  const ov=document.createElement("div"); ov.className="bonus";
+  ov.innerHTML=`<div class="bonus-in verb"><div class="bonus-tag vt">${ic("pen")} Aditza erabili</div>
+    <p class="sub" style="margin:0;text-align:center">¿Cómo se usa <b>${esc(alts(it.eu)[0])}</b>? Elige la traducción correcta.</p>
+    <div id="vbody" style="display:flex;flex-direction:column;gap:14px"></div>
+    <button class="small-link" id="vskip" style="text-align:center">Saltar</button></div>`;
+  document.body.appendChild(ov);
+  let closed=false; const close=()=>{if(closed)return;closed=true;ov.remove();if(G)done()};
+  ov.querySelector("#vskip").onclick=close;
+  prefetchVerb(it).then(q=>{
+    if(closed) return; if(!q){close();return}
+    const order=shuffle(q.opts.map((t,i)=>({t,i})));
+    ov.querySelector("#vskip").remove();
+    ov.querySelector("#vbody").innerHTML=`<div class="q long" style="text-align:center;font-family:var(--display);font-weight:600">«${esc(q.es)}»</div>
+      <div class="opts">${order.map((o,k)=>`<button class="opt" data-i="${o.i}" style="font-size:16px;text-align:left"><span class="letter">${"abcd"[k]||""})</span> ${esc(o.t)}</button>`).join("")}</div><div id="vfb"></div>`;
+    ov.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      const ok=+b.dataset.i===q.ok;
+      ov.querySelectorAll(".opt").forEach(o=>{o.disabled=true;if(+o.dataset.i===q.ok)o.classList.add("ok")});
+      if(ok){SFX.ok();if(G)G.xp+=25;S.stats.verbOk=(S.stats.verbOk||0)+1;popup("+25")}else{b.classList.add("bad");SFX.bad();buzz(100)}
+      save();
+      ov.querySelector("#vfb").innerHTML=`<div class="sheet ${ok?"ok":"bad"} slim"><h3>${ok?"Zuzen! +25":"Ez da hori"}</h3><p><span class="right-ans" style="font-size:20px">${esc(q.opts[q.ok])}</span></p>${q.azalpena?`<p class="expl"><b>Azalpena</b> ${esc(q.azalpena)}</p>`:""}<button class="big" id="vnext">Jarraitu</button></div>`;
+      const n=ov.querySelector("#vnext"); n.onclick=()=>{if(!n.disabled)close()}; if(!ok)holdButton(n); else n.focus();
+    });
+  });
+}
+/* ---------- ESAERA BONUS: cada 12 aciertos ---------- */
+const ES_EVERY=12;
+function esaeraBonus(done){
+  S.esCount=0; save();
+  const all=pool("esaera"); const it=pick(all,1)[0];
+  const opts=shuffle([it.es,...shuffle(all.filter(x=>x.id!==it.id)).slice(0,3).map(x=>x.es)]);
+  SFX.up(); buzz(40);
+  const ov=document.createElement("div"); ov.className="bonus";
+  ov.innerHTML=`<div class="bonus-in">
+    <div class="bonus-tag">${ic("quote")} Esaera bonus</div>
+    <p class="sub" style="margin:0;text-align:center">¡12 aciertos! Sin reloj y sin perder vidas. Si aciertas: +40 puntos y un comodín Izoztu.</p>
+    <div class="q long" style="text-align:center;font-family:var(--display);font-weight:600">«${esc(it.eu)}»</div>
+    <div class="eyebrow" style="text-align:center">Zer esan nahi du?</div>
+    <div class="opts">${opts.map(o=>`<button class="opt" style="font-size:16px">${esc(o)}</button>`).join("")}</div>
+    <div id="bfb"></div></div>`;
+  document.body.appendChild(ov);
+  ov.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const ok=b.textContent===it.es; mark(it,ok);
+    ov.querySelectorAll(".opt").forEach(o=>{o.disabled=true;if(o.textContent===it.es)o.classList.add("ok")});
+    if(ok){SFX.ok();confetti(70);if(G){G.xp+=40;G.freeze=Math.min(3,(G.freeze||0)+1)}S.stats.esOk=(S.stats.esOk||0)+1}
+    else{b.classList.add("bad");SFX.bad()}
+    save();
+    ov.querySelector("#bfb").innerHTML=`<div class="sheet ${ok?"ok":"bad"} slim"><h3>${ok?"Bikain! +40":"Ia-ia…"}</h3><p><b>${esc(it.eu)}</b><br>${esc(it.es)}</p><button class="big" id="bnext">Jarraitu</button></div>`;
+    const n=ov.querySelector("#bnext"); n.focus(); n.onclick=()=>{ov.remove(); if(G){if(G.mode!=="quiz")updHud(); done()}};
+  });
+}
+/* ---------- SUBIDA DE NIVEL ---------- */
+function lvlProgress(l=S.lvl){const ws=DEFAULT_ITEMS.filter(i=>i.type==="word"&&i.maila===l);const ok=ws.filter(i=>status(i)==="ok").length;return{ok,total:ws.length,need:Math.ceil(ws.length*.7)}}
+function checkLevelUp(){let up=false;while(S.lvl<5){const p=lvlProgress();if(p.ok>=p.need){S.lvl++;up=true}else break}if(up){save();syncSettings()}return up}
+/* ---------- MEDALLAS ---------- */
+const MEDALS=[
+  ["first","Lehen urratsa","Juega tu primera partida",s=>s.games>=1],
+  ["fire5","Su bizia","5 aciertos seguidos",s=>S.best>=5],
+  ["fire15","Geldiezina","15 aciertos seguidos",s=>S.best>=15],
+  ["fast","Tximista","Responde en menos de 2 segundos",s=>s.fast>=1],
+  ["fast25","Erauntsia","25 respuestas relámpago",s=>s.fast>=25],
+  ["perfect","Perfektua","Una partida de 10 sin fallos",s=>s.perfect>=1],
+  ["surv20","Biziraulea","20 aciertos en Txapelketa",s=>(s.survRight||0)>=20],
+  ["surv40","Txapeldun","40 aciertos en Txapelketa",s=>(s.survRight||0)>=40],
+  ["daily","Eguneko erronka","Completa un reto diario",s=>s.daily>=1],
+  ["streak3","Egunero","3 días seguidos jugando",s=>S.streak>=3],
+  ["streak7","Astebete","7 días seguidos jugando",s=>S.streak>=7],
+  ["es5","Esaera zalea","Acierta 5 esaerak bonus",s=>(s.esOk||0)>=5],
+  ["es20","Esaera maisua","Acierta 20 esaerak bonus",s=>(s.esOk||0)>=20],
+  ["lvl3","B1 maila","Llega al nivel B1",s=>S.lvl>=3],
+  ["lvl5","C1 maila","Llega al nivel C1",s=>S.lvl>=5],
+  ["verb10","Aditz trebea","Acierta 10 frases con verbos",s=>(s.verbOk||0)>=10],
+  ["mine10","Hiztegigilea","Añade 10 palabras propias",s=>S.mine.length>=10],
+  ["c100","Ehun","100 aciertos en total",s=>s.correct>=100],
+  ["c500","Bostehun","500 aciertos en total",s=>s.correct>=500]
+];
+function checkMedals(){
+  S.medals=S.medals||{}; const st=S.stats; const got=[];
+  MEDALS.forEach(([id,name,,fn])=>{if(!S.medals[id]&&fn(st)){S.medals[id]=today();got.push(name)}});
+  if(got.length){save();got.forEach((n,i)=>setTimeout(()=>{medalToast(n);SFX.up()},600+i*1800))}
+}
+function medalToast(n){const t=document.createElement("div");t.className="medal-toast";t.innerHTML=`<svg><use href="#i-medal"/></svg><div><small>Domina berria</small><b>${esc(n)}</b></div>`;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+
+function endGame(){
+  cancelAnimationFrame(timerRAF);
+  const lost=G.hearts<=0; S.xp+=G.xp;
+  const st=S.stats; st.games=(st.games||0)+1;
+  const total=G.mode==="surv"?G.i+1:G.qs.length;
+  let record=false, extra="";
+  if(G.mode==="surv"){st.survRight=Math.max(st.survRight||0,G.right);if(G.xp>(S.survBest||0)){record=S.survBest>0;S.survBest=G.xp;if(!record)record=G.xp>0}}
+  if(G.mode==="daily"){S.daily=S.daily||{};const prev=S.daily[today()];if(!prev){S.daily[today()]={score:G.xp,right:G.right};st.daily=(st.daily||0)+1}else extra="Ya hiciste el reto de hoy: esta vuelta no cuenta para el resultado."}
+  if(!lost&&G.right===total&&total>=10) st.perfect=(st.perfect||0)+1;
+  const leveled=checkLevelUp();
+  save();
+  const missed=[...new Map(G.missed.map(m=>[m.id,m])).values()];
+  const title = G.mode==="surv"?(record?"Errekor berria!":"Amaitu da!"):lost?"Bizitzarik gabe!":G.right===total?"Perfektua!":"Amaituta!";
+  const sub = G.mode==="surv"?`${G.right} palabras acertadas · récord: ${S.survBest} puntos`:lost?"Te has quedado sin vidas. ¡Otra vez!":`${G.right} de ${total} correctas`;
+  $("#layer").innerHTML=`<div class="game"><div class="game-in" style="overflow-y:auto">
+   <div class="end">
+     <svg class="lb" style="color:${lost&&!record?"var(--red)":"var(--accent)"}"><use href="#lauburu"/></svg>
+     <h2>${title}</h2>
+     <p class="sub" style="margin:0">${sub}</p>
+     ${extra?`<p class="sub" style="margin:0">${extra}</p>`:""}
+     ${leveled?`<div class="lvlup"><small>Maila berria · Nuevo nivel</small><b>${MAILA_NAMES[S.lvl]}</b><span>Desbloqueadas palabras más difíciles${S.lvl>=4?" y Txapelketa más rápida":""}.</span></div>`:(()=>{const p=lvlProgress();return S.lvl<5?`<p class="sub" style="margin:0">Hacia ${MAILA_NAMES[S.lvl+1].split(" ")[0]}: ${p.ok}/${p.need} palabras de ${MAILA_NAMES[S.lvl].split(" ")[0]} dominadas</p>`:""})()}
+     <div class="stats" style="width:100%"><div class="stat"><b>+${G.xp}</b><span>${G.mode==="surv"?"Puntos":"XP"}</span></div><div class="stat"><b>${G.right}</b><span>Ondo</span></div><div class="stat"><b>${G.fast}</b><span>Tximistak</span></div></div>
+     ${G.mode==="daily"&&!extra?`<button class="small-link" id="share" style="text-align:center">Copiar resultado para compartir</button>`:""}
+     ${missed.length?`<div class="panel" style="width:100%;text-align:left"><div class="eyebrow">Errepasatzeko · Para repasar</div><div class="list">${missed.map(m=>`<div class="li"><div class="t"><b>${esc(m.eu)}</b><span>${esc(m.es)}</span></div></div>`).join("")}</div></div>`:""}
+   </div>
+   <div class="row2"><button class="big ghost" id="home">Hasiera</button><button class="big" id="again">Berriro</button></div>
+  </div></div>`;
+  if(leveled){setTimeout(()=>{confetti(180);SFX.up()},250)}
+  else if(record||(!lost&&G.right===total&&total>=5)){setTimeout(()=>{confetti(140);SFX.up()},250)}
+  const mode=G.mode, res=G.right, pts=G.xp;
+  const sh=$("#share"); if(sh) sh.onclick=()=>{const txt=`Hitz Jokoa · ${today()}\nEguneko erronka: ${res}/10 · ${pts} puntu`;
+    navigator.clipboard.writeText(txt).then(()=>toast("Copiado")).catch(()=>toast(txt))};
+  $("#home").onclick=closeGame; $("#again").onclick=()=>{$("#layer").innerHTML="";start(mode)};
+  checkMedals();
+}
+
+/* ---------- MIS PALABRAS ---------- */
+let pendingDel=null;
+function allCats(){return [...new Set(Object.keys(BASE_WORDS).concat(words().map(m=>m.cat)))]}
+function renderWords(){
+  const mine=S.mine.slice().reverse();
+  $("#app").innerHTML=topBar()+`
+  <section style="display:flex;flex-direction:column;gap:4px"><h2 style="font-size:26px">Nire hitzak</h2><p class="sub" style="margin:0">Añade tus propias palabras y esaerak. Entran en todos los juegos. La app revisa la ortografía según el batua y te avisa si ya tienes la palabra.</p></section>
+  <form class="panel" id="addf" autocomplete="off">
+    <div class="seg" id="typ"><button type="button" data-t="word" aria-pressed="true">Hitza · Palabra</button><button type="button" data-t="esaera" aria-pressed="false">Esaera</button></div>
+    <label for="f-eu">Euskaraz<input class="field" id="f-eu" required placeholder="adib. oroimena"></label>
+    <label for="f-es">En castellano<input class="field" id="f-es" required placeholder="p. ej. la memoria / el recuerdo"></label>
+    <p class="sub" style="margin:0">Si tiene varios significados, sepáralos con <b>/</b>. En el contrarreloj valdrá cualquiera.</p>
+    <div class="grid2" id="catbox">
+      <label for="f-cat">Gaia<select class="field" id="f-cat">${allCats().map(c=>`<option>${esc(c)}</option>`).join("")}<option value="__new">+ Nueva…</option></select></label>
+      <label for="f-new" id="newl" hidden>Nueva categoría<input class="field" id="f-new" placeholder="Lana"></label>
+    </div>
+    <label for="f-ex">Ejemplo (opcional)<input class="field" id="f-ex" placeholder="Oroimen ona dauka"></label>
+    <label class="chk" for="f-chk" id="chkrow"><input type="checkbox" id="f-chk" ${S.check!==false?"checked":""}> Revisar ortografía (norma del batua)</label>
+    <button class="big" type="submit" id="addgo">Gehitu</button>
+    <div id="rev" hidden></div>
+  </form>
+  <details class="panel">
+    <summary style="font-weight:700;cursor:pointer">Añadir muchas de golpe</summary>
+    <p class="sub" style="margin:0">Una por línea: <b>euskera = castellano</b>. Las que empiecen por <b>!</b> se guardan como esaera.</p>
+    <label for="bulk">Lista<textarea class="field" id="bulk" placeholder="oroimena = la memoria / el recuerdo&#10;ametsa = el sueño&#10;!Etxean ez dago gauzarik = …"></textarea></label>
+    <label for="bulkcat">Gaia para estas palabras<input class="field" id="bulkcat" value="Nire hitzak"></label>
+    <button class="big ghost" type="button" id="bulkgo">Gehitu guztiak</button>
+    <div id="brev" hidden></div>
+  </details>
+  <section class="panel">
+    <div class="level-row"><div class="eyebrow">Zure zerrenda · ${S.mine.length}</div>${S.mine.length?`<button class="small-link" id="copyb">Copiar copia de seguridad</button>`:""}</div>
+    ${mine.length?`<div class="list">${mine.map(m=>`<div class="li"><div class="t"><b>${esc(m.eu)}</b><span>${esc(m.es)} · ${m.type==="esaera"?"Esaera":esc(m.cat)}</span></div><button class="del" data-del="${m.id}">${pendingDel===m.id?"¿Seguro?":"Ezabatu"}</button></div>`).join("")}</div>`
+      :`<p class="sub" style="margin:0">Todavía no has añadido nada. Empieza con una palabra que hayas oído hoy.</p>`}
+    <details><summary class="small-link" style="cursor:pointer">Restaurar desde copia</summary>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><label for="restore">Pega aquí tu copia<textarea class="field" id="restore"></textarea></label><button class="big ghost" type="button" id="restoreb">Restaurar</button></div>
+    </details>
+  </section>`;
+  let t="word";
+  $("#typ").querySelectorAll("button").forEach(b=>b.onclick=()=>{t=b.dataset.t;$("#typ").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));$("#catbox").hidden=t==="esaera";$("#f-eu").placeholder=t==="esaera"?"adib. Urrutiko intxaurrak hamalau":"adib. oroimena";$("#f-es").placeholder=t==="esaera"?"Significado":"p. ej. la memoria"});
+  $("#f-cat").onchange=e=>{$("#newl").hidden=e.target.value!=="__new"};
+
+  $("#f-chk").onchange=e=>{S.check=e.target.checked;save()};
+  const commit=(list,label)=>{list.forEach(x=>addItem(x.eu,x.es,x.cat,x.type,x.ex||""));save();syncSettings();toast(label);renderWords();checkMedals()};
+  $("#addf").onsubmit=async e=>{e.preventDefault();
+    const eu=$("#f-eu").value.trim(), es=$("#f-es").value.trim(); if(!eu||!es) return;
+    let cat=$("#f-cat").value; if(cat==="__new") cat=$("#f-new").value.trim()||"Nire hitzak";
+    const entry={eu,es,ex:$("#f-ex").value.trim(),type:t,cat:t==="esaera"?"Esaerak":cat};
+    if(S.check===false){commit([entry],`Gehituta: ${eu}`);$("#f-eu").focus();return}
+    localReview([entry],$("#rev"),commit);
+  };
+  $("#bulkgo").onclick=async()=>{
+    const cat=$("#bulkcat").value.trim()||"Nire hitzak"; const list=[];
+    $("#bulk").value.split("\n").forEach(line=>{const m=line.split(/\s*[=:\t]\s*|\s+-\s+/); if(m.length<2) return;
+      let eu=m[0].trim(), es=m.slice(1).join(" ").trim(); if(!eu||!es) return;
+      const isE=eu.startsWith("!"); if(isE) eu=eu.slice(1).trim();
+      list.push({eu,es,ex:"",type:isE?"esaera":"word",cat:isE?"Esaerak":cat})});
+    if(!list.length){toast("No he encontrado líneas con «=»");return}
+    if(S.check===false){commit(list,`${list.length} gehituta`);return}
+    localReview(list,$("#brev"),commit);
+  };
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.del;
+    if(pendingDel!==id){pendingDel=id;renderWords();setTimeout(()=>{if(pendingDel===id){pendingDel=null;if(tab==="words"&&!G)renderWords()}},3000);return}
+    S.mine=S.mine.filter(m=>m.id!==id); delete S.prog[id]; pendingDel=null; save(); syncSettings(); toast("Ezabatuta"); renderWords();
+  });
+  const cb=$("#copyb"); if(cb) cb.onclick=()=>{const txt=JSON.stringify(S.mine);
+    navigator.clipboard.writeText(txt).then(()=>toast("Copiado. Guárdalo en una nota.")).catch(()=>{const r=$("#restore");r.closest("details").open=true;r.value=txt;r.select();toast("Selecciona y copia el texto")})};
+  $("#restoreb").onclick=()=>{try{const arr=JSON.parse($("#restore").value);if(!Array.isArray(arr))throw 0;let n=0;
+    arr.forEach(m=>{if(m&&m.eu&&m.es&&!S.mine.some(x=>x.eu===m.eu&&x.es===m.es)){addItem(m.eu,m.es,m.cat||"Nire hitzak",m.type==="esaera"?"esaera":"word",m.ex||"");n++}});
+    save();toast(`${n} restauradas`);renderWords()}catch(e){toast("Ese texto no es una copia válida")}};
+}
+/* ---------- PALABRAS DEL DÍA (base de datos: egunekoak/<fecha>) ---------- */
+let syncChain=Promise.resolve(), lastSync="", dailyLoaded=false, genState="";
+function settingsBody(){return{lvl:S.lvl,mine:S.mine.map(m=>m.eu).slice(0,2000)}}
+function syncSettings(){if(!DBX)return;const body=settingsBody(),k=JSON.stringify(body);if(k===lastSync)return;lastSync=k;
+  syncChain=syncChain.then(()=>DBX.doc("ezarpenak/nagusia").set(body)).catch(()=>{})}
+
+/* Explicación de un fallo: nota guardada, o una explicación breve pedida a Claude */
+function explainInto(el,it,typed){
+  if(!el) return;
+  const show=t=>{el.hidden=false;el.innerHTML=`<b>Azalpena</b> ${esc(t)}`};
+  if(it.nota){show(it.nota);return}
+  S.expl=S.expl||{};
+  if(S.expl[it.id]){show(S.expl[it.id]);return}
+  el.hidden=true;
+}
+/* El botón Jarraitu espera unos segundos tras un fallo */
+const WAIT_MS=3500;
+function holdButton(btn){
+  if(!btn) return; btn.disabled=true; btn.classList.add("wait"); btn.style.setProperty("--wait",WAIT_MS+"ms");
+  setTimeout(()=>{btn.disabled=false;btn.classList.remove("wait")},WAIT_MS);
+}
+/* ---------- BANCO DE PALABRAS: 30 se desbloquean cada día que abres la app ---------- */
+/* [euskera, castellano, tema, nivel 1-5, nota, ejemplo] */
+const BANK_DAYS=[
+[["bizilaguna","el vecino / la vecina","Gizartea",3,"De bizi (vivir) + lagun (compañero): «el que vive al lado».","Bizilagunak oso jatorrak dira."],
+ ["lantegia","la fábrica / el taller","Lana",3,"Lan (trabajo) + -tegi (lugar): «lugar de trabajo».","Aitak lantegian egiten du lan."],
+ ["nagusia","el jefe / principal / el mayor","Lana",3,"Como sustantivo es «jefe»; como adjetivo, «principal»: kale nagusia = la calle mayor.","Nagusiak bilera deitu du."],
+ ["langabezia","el desempleo / el paro","Lana",4,"Lan + gabe (sin): «estar sin trabajo». Langabea = el parado.","Langabezia jaitsi da aurten."],
+ ["soldata","el sueldo / el salario","Lana",3,"Soldata igo = subir el sueldo.","Soldata hilaren amaieran jasotzen dut."],
+ ["bilera","la reunión","Lana",3,"Viene de bildu (reunir, juntar).","Bilera hamarretan hasiko da."],
+ ["epea","el plazo","Lana",4,"Epe laburrean / luzean = a corto / largo plazo.","Epea ostiralean amaitzen da."],
+ ["eskaera","la solicitud / la petición / el pedido","Lana",4,"De eskatu (pedir) + -era (acción).","Eskaera bidali dut."],
+ ["osasuna","la salud","Osasuna",2,"Osasun-zentroa = el centro de salud.","Osasuna da garrantzitsuena."],
+ ["gaixotasuna","la enfermedad","Osasuna",3,"Gaixo (enfermo) + -tasun (cualidad).","Gaixotasun larria du."],
+ ["sendagilea","el médico / la médica","Osasuna",3,"Senda- (curar) + -gile (el que hace). También se dice medikua.","Sendagilearengana joan naiz."],
+ ["zauria","la herida","Osasuna",3,"Zauritu = herir; zauritua = el herido.","Zauria garbitu behar duzu."],
+ ["sendatu","curar / curarse","Osasuna",3,"Misma raíz que sendagile (médico).","Laster sendatuko zara."],
+ ["arnasa","la respiración / el aliento","Osasuna",4,"Arnasa hartu = respirar, tomar aire.","Arnasa hartu eta lasaitu."],
+ ["hezurra","el hueso","Osasuna",3,"Hezurra hautsi = romperse un hueso.","Hezur bat hautsi zuen."],
+ ["gogorra","duro / difícil","Izenondoak",3,"Lo contrario de biguna (blando).","Egun gogorra izan da."],
+ ["leuna","suave / liso","Izenondoak",3,"Se dice también de la voz o del trato: ahots leuna.","Azal leuna du."],
+ ["estua","estrecho / apretado","Izenondoak",4,"Lo contrario de zabala. Estu egon = estar en apuros.","Kale estu bat da."],
+ ["zabala","ancho / amplio","Izenondoak",3,"Zabaldu = abrir, ampliar, difundir.","Plaza zabala da."],
+ ["hutsa","vacío / el error","Izenondoak",3,"Hutsik = vacío (estado). Huts egin = fallar.","Botila hutsik dago."],
+ ["betea","lleno","Izenondoak",3,"Bete = llenar o cumplir. Beteta = lleno (estado).","Edalontzia beteta dago."],
+ ["jaso","recibir / recoger / levantar","Aditzak",3,"Mezua jaso = recibir un mensaje; mahaia jaso = recoger la mesa; eskua jaso = levantar la mano.","Zure mezua jaso dut."],
+ ["bidali","enviar / mandar","Aditzak",2,"Mezua bidali = mandar un mensaje.","Gutuna bidali dut."],
+ ["aitortu","confesar / reconocer","Aditzak",4,"Aitorpena = la confesión o la declaración (errenta-aitorpena = declaración de la renta).","Akatsa aitortu zuen."],
+ ["mehatxatu","amenazar","Aditzak",4,"Mehatxua = la amenaza.","Mehatxatu egin zuten."],
+ ["ospatu","celebrar","Aditzak",3,"Ospakizuna = la celebración.","Urtebetetzea ospatuko dugu."],
+ ["eragin","causar / provocar / influir","Aditzak",4,"Como sustantivo, eragina = la influencia, el efecto.","Ekaitzak kalte handiak eragin ditu."],
+ ["aurreikusi","prever","Aditzak",5,"Aurre (delante) + ikusi (ver): «ver antes».","Ez genuen hori aurreikusi."],
+ ["ustekabea","la sorpresa / el imprevisto","Abstraktuak",4,"Uste (creer, esperar) + gabe (sin): «sin esperarlo». Ustekabean = de improviso.","Ustekabe polita izan da."],
+ ["oroimena","la memoria / el recuerdo","Abstraktuak",4,"Oroitu = recordar (más culto que gogoratu).","Oroimen ona du."]],
+[["herria","el pueblo / el país / la gente","Gizartea",2,"Según el contexto: un pueblo, un país o su gente. Herritarra = el ciudadano."],
+ ["hiria","la ciudad","Gizartea",1,"Hiriburua = la capital (hiri + buru, cabeza)."],
+ ["auzoa","el barrio","Gizartea",2,"Auzokidea = el vecino del barrio (auzo + -kide, compañero)."],
+ ["kalea","la calle","Gizartea",1,"Kalean = en la calle."],
+ ["denda","la tienda","Gizartea",1,"Dendaria = el tendero."],
+ ["azoka","el mercado / la feria","Gizartea",2,"Liburu-azoka = la feria del libro."],
+ ["udala","el ayuntamiento","Gizartea",3,"Udaletxea = el edificio del ayuntamiento (udal + etxe)."],
+ ["gobernua","el gobierno","Gizartea",3,"Gobernatu = gobernar."],
+ ["legea","la ley","Gizartea",3,"Legezkoa = legal (lege + -zko)."],
+ ["hauteskundeak","las elecciones","Gizartea",4,"De hautatu (elegir). Se usa en plural."],
+ ["eskubidea","el derecho","Gizartea",3,"Giza eskubideak = los derechos humanos."],
+ ["betebeharra","la obligación / el deber","Gizartea",4,"Bete (cumplir) + behar (necesidad): «lo que hay que cumplir»."],
+ ["gizartea","la sociedad","Gizartea",3,"Gizon/giza (persona) + -arte: «entre personas». Gizarte-zerbitzuak = servicios sociales."],
+ ["jendea","la gente","Gizartea",1,"Va en singular: jendea etorri da (ha venido la gente)."],
+ ["herritarra","el ciudadano / la ciudadana","Gizartea",3,"Herri + -tar (de, natural de)."],
+ ["atzerritarra","el extranjero / la extranjera","Gizartea",3,"Atzerri (el extranjero, otro país) + -tar."],
+ ["hizkuntza","la lengua / el idioma","Gizartea",2,"Hitz (palabra) + -kuntza. Ama-hizkuntza = lengua materna."],
+ ["laguna","el amigo / la amiga / el compañero","Gizartea",1,"Lagundu (ayudar) viene de aquí: «hacer de compañero»."],
+ ["ikaslea","el alumno / el estudiante","Gizartea",1,"Ikasi (aprender) + -le (el que hace)."],
+ ["irakaslea","el profesor / la profesora","Gizartea",1,"Irakatsi (enseñar) + -le (el que hace)."],
+ ["eskola","la escuela","Gizartea",1,"Eskolara joan = ir a la escuela."],
+ ["unibertsitatea","la universidad","Gizartea",2,"Unibertsitate-ikaslea = estudiante universitario."],
+ ["liburutegia","la biblioteca","Gizartea",2,"Liburu (libro) + -tegi (lugar)."],
+ ["egunkaria","el periódico / el diario","Gizartea",3,"Egun (día) + -kari: «lo que sale cada día»."],
+ ["albistea","la noticia","Gizartea",3,"Albisteak = las noticias, el informativo."],
+ ["aldizkaria","la revista","Gizartea",4,"Aldi (periodo, vez) + -kari: «lo que sale cada cierto tiempo»."],
+ ["irratia","la radio","Gizartea",2,"Irratian entzun dut = lo he oído en la radio."],
+ ["telebista","la televisión","Gizartea",1,"Telebista ikusi = ver la televisión."],
+ ["iragarkia","el anuncio","Gizartea",4,"Iragarri = anunciar."],
+ ["inkesta","la encuesta","Gizartea",4,"Inkesta bat egin = hacer una encuesta."]],
+[["familia","la familia","Familia",1,"Familiakoak = los familiares."],
+ ["gurasoak","los padres","Familia",2,"Aita eta ama. Gurasoa = el padre o la madre."],
+ ["aita","el padre","Familia",1,"Aitaginarreba = el suegro."],
+ ["ama","la madre","Familia",1,"Amaginarreba = la suegra."],
+ ["anaia","el hermano (de un chico)","Familia",2,"Un chico dice anaia; una chica dice neba."],
+ ["arreba","la hermana (de un chico)","Familia",3,"Un chico dice arreba; una chica dice ahizpa."],
+ ["ahizpa","la hermana (de una chica)","Familia",3,"Una chica dice ahizpa; un chico dice arreba."],
+ ["neba","el hermano (de una chica)","Familia",3,"Una chica dice neba; un chico dice anaia."],
+ ["semea","el hijo","Familia",1,"Seme-alabak = los hijos e hijas."],
+ ["alaba","la hija","Familia",1,"Seme-alabak = los hijos e hijas."],
+ ["aitona","el abuelo","Familia",1,"Aita + -ona. Aitona-amonak = los abuelos."],
+ ["amona","la abuela","Familia",1,"Ama + -ona."],
+ ["osaba","el tío","Familia",2,"Su pareja es izeba (la tía)."],
+ ["izeba","la tía","Familia",2,"Su pareja es osaba (el tío)."],
+ ["lehengusua","el primo / la prima","Familia",3,"Lehen (primero) + gusu: primo hermano."],
+ ["iloba","el sobrino / la sobrina","Familia",3,"El nieto o la nieta se dice biloba."],
+ ["senarra","el marido","Familia",2,"Senar-emazteak = el matrimonio (marido y mujer)."],
+ ["emaztea","la esposa / la mujer","Familia",3,"Ojo: «mujer» en general es emakumea."],
+ ["bikotea","la pareja","Familia",3,"Bikote = conjunto de dos (bi = dos)."],
+ ["haurra","el niño / la niña / el bebé","Familia",1,"Haurtzaroa = la infancia."],
+ ["gaztea","joven / el joven","Familia",2,"Gazteria = la juventud."],
+ ["zaharra","viejo / mayor","Izenondoak",1,"Zahartu = envejecer. Adinekoa es más respetuoso para personas."],
+ ["burua","la cabeza","Gorputza",1,"Buruko mina = dolor de cabeza. Buruz ikasi = aprender de memoria."],
+ ["eskua","la mano","Gorputza",1,"Eskuz = a mano. Eskuina = la derecha."],
+ ["hanka","la pierna","Gorputza",1,"Hankaz gora = patas arriba."],
+ ["oina","el pie","Gorputza",1,"Oinez = a pie."],
+ ["begia","el ojo","Gorputza",1,"Begiratu = mirar (de begi)."],
+ ["belarria","la oreja / el oído","Gorputza",2,"Belarriko mina = dolor de oído."],
+ ["ahoa","la boca","Gorputza",1,"Ahoz = oralmente, de palabra."],
+ ["sudurra","la nariz","Gorputza",2,"Sudurretik odola = sangre por la nariz."]],
+[["jan","comer","Aditzak",1,"Janaria = la comida (lo que se come)."],
+ ["edan","beber","Aditzak",1,"Edaria = la bebida."],
+ ["erosi","comprar","Aditzak",1,"Erosketak egin = hacer la compra."],
+ ["saldu","vender","Aditzak",2,"Salmenta = la venta."],
+ ["ikusi","ver","Aditzak",1,"Ikusgarria = espectacular, digno de ver."],
+ ["entzun","oír / escuchar","Aditzak",2,"Entzulea = el oyente."],
+ ["esan","decir","Aditzak",1,"Esaera = el dicho, el refrán (de esan)."],
+ ["egin","hacer","Aditzak",1,"Forma muchos verbos: lan egin, lo egin, hitz egin."],
+ ["etorri","venir","Aditzak",1,"Intransitivo: etorri naiz (he venido). Etorkizuna = el futuro."],
+ ["joan","ir / irse","Aditzak",1,"Intransitivo: joan naiz (he ido)."],
+ ["irten","salir","Aditzak",2,"Irteera = la salida. Sinónimo: atera."],
+ ["sartu","entrar / meter","Aditzak",2,"Sarrera = la entrada."],
+ ["hasi","empezar / comenzar","Aditzak",2,"Hasiera = el comienzo."],
+ ["amaitu","terminar / acabar","Aditzak",2,"Amaiera = el final. Sinónimo: bukatu."],
+ ["idatzi","escribir","Aditzak",1,"Idazlea = el escritor (idatz- + -le)."],
+ ["irakurri","leer","Aditzak",1,"Irakurlea = el lector."],
+ ["hitz egin","hablar","Aditzak",1,"Hitz (palabra) + egin (hacer)."],
+ ["ibili","andar / caminar","Aditzak",2,"Intransitivo: ibili naiz. Ibilaldia = el paseo."],
+ ["korrika egin","correr","Aditzak",2,"Korrika = corriendo."],
+ ["lo egin","dormir","Aditzak",1,"Lo (sueño) + egin. Logela = el dormitorio."],
+ ["esnatu","despertar / despertarse","Aditzak",2,"Esna egon = estar despierto."],
+ ["garbitu","lavar / limpiar","Aditzak",2,"De garbi (limpio)."],
+ ["prestatu","preparar","Aditzak",2,"Prest = listo, preparado."],
+ ["ordaindu","pagar","Aditzak",2,"Ordaina = la recompensa, lo que se da a cambio."],
+ ["itxi","cerrar","Aditzak",2,"Itxita = cerrado."],
+ ["ireki","abrir","Aditzak",2,"Irekita = abierto."],
+ ["galdetu","preguntar","Aditzak",2,"Galdera = la pregunta."],
+ ["erantzun","responder / contestar / la respuesta","Aditzak",2,"Es verbo y sustantivo a la vez."],
+ ["pentsatu","pensar","Aditzak",2,"Pentsamendua = el pensamiento."],
+ ["sinetsi","creer","Aditzak",3,"Sinesten dut = creo. Sinesgarria = creíble."]],
+[["bihotza","el corazón","Gorputza",2,"Bihotzez = de corazón."],
+ ["bizkarra","la espalda","Gorputza",2,"Bizkarreko mina = dolor de espalda."],
+ ["eguraldia","el tiempo (meteorológico)","Natura",2,"Egun (día) + aldi (vez, estado). Eguraldi ona = buen tiempo."],
+ ["eguzkia","el sol","Natura",1,"Eguzkitan = al sol."],
+ ["ilargia","la luna","Natura",2,"Ilbetea = la luna llena."],
+ ["izarra","la estrella","Natura",2,"Izar iheskorra = estrella fugaz."],
+ ["beroa","el calor / caliente","Natura",1,"Bero dago = hace calor."],
+ ["hotza","el frío / frío","Natura",1,"Hotz dago = hace frío."],
+ ["ortzadarra","el arco iris","Natura",3,"Palabra bonita: ortz (cielo) + adar (rama)."],
+ ["txingorra","el granizo","Natura",4,"Txingorra ari du = está granizando."],
+ ["izotza","el hielo / la helada","Natura",3,"Izoztu = helar, congelar (como el comodín del juego)."],
+ ["bidea","el camino","Natura",2,"Bidaia (el viaje) viene de bide."],
+ ["zubia","el puente","Natura",2,"Zubi-eguna = día de puente."],
+ ["baserria","el caserío","Natura",2,"Baso (bosque) + herri: casa de campo vasca. Baserritarra = el que vive en el caserío."],
+ ["hondarra","la arena","Natura",3,"Hondartza (la playa) viene de hondar."],
+ ["harria","la piedra","Natura",2,"Harrizkoa = de piedra."],
+ ["lorea","la flor","Natura",1,"Loradenda = la floristería."],
+ ["belarra","la hierba","Natura",2,"Belardia = el prado."],
+ ["txoria","el pájaro","Natura",1,"Hobe da eskuko txoria… (más vale pájaro en mano)."],
+ ["txakurra","el perro","Natura",1,"Txakurkumea = el cachorro."],
+ ["katua","el gato","Natura",1,"Katakumea = el gatito."],
+ ["behia","la vaca","Natura",2,"Behi-esnea = leche de vaca."],
+ ["ardia","la oveja","Natura",2,"Ardi-gazta = queso de oveja."],
+ ["zaldia","el caballo","Natura",2,"Zaldiz = a caballo."],
+ ["ehiza","la caza","Natura",4,"Ehiztaria = el cazador."],
+ ["arrantza","la pesca","Natura",4,"Arrantzalea = el pescador."],
+ ["jaia","la fiesta","Natura",1,"Jaiak = las fiestas del pueblo. Jai egun = día festivo."],
+ ["oporrak","las vacaciones","Natura",2,"Se usa en plural: oporretan = de vacaciones."],
+ ["bidaia","el viaje","Natura",2,"Bidaiatu = viajar. De bide (camino)."],
+ ["hondakinak","los residuos / los restos","Natura",5,"Hondakin = resto, lo que queda. Hondakinak birziklatu = reciclar residuos."]],
+[["ezagutza","el conocimiento","Abstraktuak",4,"De ezagutu (conocer)."],
+ ["jakintza","el saber / la sabiduría","Abstraktuak",5,"De jakin (saber)."],
+ ["garapena","el desarrollo","Abstraktuak",4,"De garatu (desarrollar)."],
+ ["ikerketa","la investigación","Abstraktuak",4,"De ikertu (investigar). Ikertzailea = el investigador."],
+ ["hezkuntza","la educación","Abstraktuak",4,"De hezi (educar)."],
+ ["ingurumena","el medio ambiente","Abstraktuak",4,"De ingurua (el entorno)."],
+ ["kutsadura","la contaminación","Abstraktuak",4,"De kutsatu (contaminar, contagiar)."],
+ ["baliabidea","el recurso / el medio","Abstraktuak",5,"Baliatu (servirse de) + bide (camino)."],
+ ["aurrekontua","el presupuesto","Lana",5,"Aurre (antes) + kontu (cuenta): «la cuenta previa»."],
+ ["zerga","el impuesto","Lana",4,"Zergak ordaindu = pagar impuestos."],
+ ["zorra","la deuda","Lana",4,"Zordun = deudor (zor + -dun)."],
+ ["irabazia","la ganancia / el beneficio","Lana",4,"De irabazi (ganar)."],
+ ["galera","la pérdida","Lana",4,"De galdu (perder)."],
+ ["enpresa","la empresa","Lana",2,"Enpresaburua = el empresario."],
+ ["langilea","el trabajador / la trabajadora","Lana",2,"Lan (trabajo) + -gile (el que hace)."],
+ ["lanpostua","el puesto de trabajo","Lana",4,"Lan + postu (puesto)."],
+ ["erakundea","la institución / la organización","Gizartea",5,"De eraiki (construir): «lo construido»."],
+ ["arduraduna","el responsable / el encargado","Lana",4,"Ardura (responsabilidad) + -dun (que tiene)."],
+ ["bezeroa","el cliente / la clienta","Lana",3,"Bezeroarentzako arreta = atención al cliente."],
+ ["hornitzailea","el proveedor","Lana",5,"De hornitu (abastecer, suministrar)."],
+ ["akordioa","el acuerdo","Gizartea",3,"Akordio batera iritsi = llegar a un acuerdo."],
+ ["adostasuna","el consenso / el acuerdo","Gizartea",5,"Ados (de acuerdo) + -tasun."],
+ ["gatazka","el conflicto","Gizartea",4,"Gatazkatsua = conflictivo."],
+ ["bakea","la paz","Gizartea",3,"Bakean utzi = dejar en paz."],
+ ["gerra","la guerra","Gizartea",2,"Gerrate = periodo de guerra."],
+ ["askatasuna","la libertad","Gizartea",3,"Aske (libre) + -tasun."],
+ ["berdintasuna","la igualdad","Gizartea",4,"Berdin (igual) + -tasun."],
+ ["segurtasuna","la seguridad","Gizartea",4,"Seguru + -tasun."],
+ ["arriskua","el riesgo / el peligro","Gizartea",3,"Arriskutsua = peligroso."],
+ ["arazoa","el problema","Abstraktuak",2,"Arazorik ez! = ¡ningún problema!"]],
+[["handia","grande","Izenondoak",1,"Handitu = agrandar, crecer."],
+ ["txikia","pequeño","Izenondoak",1,"Txikitan = de pequeño."],
+ ["luzea","largo","Izenondoak",1,"Luzatu = alargar, prolongar."],
+ ["laburra","corto","Izenondoak",2,"Laburbildu = resumir (labur + bildu)."],
+ ["altua","alto","Izenondoak",1,"También garaia."],
+ ["baxua","bajo","Izenondoak",2,"Baxu hitz egin = hablar bajo."],
+ ["berria","nuevo / la noticia","Izenondoak",1,"Berriak = las noticias. Zer berri? = ¿qué tal?, ¿qué hay de nuevo?"],
+ ["gazia","salado","Izenondoak",3,"Gatz (sal) → gazi."],
+ ["gozoa","dulce / rico / sabroso","Izenondoak",2,"Gozokiak = los dulces, las chuches."],
+ ["mingotsa","amargo","Izenondoak",4,"También se dice de una experiencia: oroitzapen mingotsa."],
+ ["garratza","agrio / ácido","Izenondoak",4,"Lo contrario de gozoa."],
+ ["beltza","negro","Izenondoak",1,"Ogi beltza = pan integral."],
+ ["zuria","blanco","Izenondoak",1,"Ardo zuria = vino blanco."],
+ ["gorria","rojo","Izenondoak",1,"Ardo gorria = vino tinto."],
+ ["berdea","verde","Izenondoak",1,"Berdegunea = la zona verde."],
+ ["urdina","azul","Izenondoak",1,"Itsaso urdina = el mar azul."],
+ ["horia","amarillo","Izenondoak",2,"Orria (la hoja de papel) es otra palabra: ¡ojo con la h!"],
+ ["ederra","hermoso / bello","Izenondoak",2,"Edertasuna = la belleza."],
+ ["itsusia","feo","Izenondoak",2,"Lo contrario de ederra o polita."],
+ ["aberatsa","rico (de dinero)","Izenondoak",2,"Para la comida rica se dice gozoa."],
+ ["pobrea","pobre","Izenondoak",2,"Pobrezia = la pobreza."],
+ ["alaia","alegre","Izenondoak",3,"Alaitasuna = la alegría."],
+ ["goibela","triste / sombrío / nublado","Izenondoak",4,"Se dice de personas y del cielo: egun goibela (día gris)."],
+ ["jatorra","majo / simpático","Izenondoak",3,"También significa «auténtico, de buena cepa»."],
+ ["zakarra","tosco / grosero / áspero","Izenondoak",4,"Zakarkeria = la grosería."],
+ ["burugogorra","cabezota / testarudo","Izenondoak",4,"Buru (cabeza) + gogor (duro): «cabeza dura»."],
+ ["ados","de acuerdo","Lokailuak",3,"Ados nago = estoy de acuerdo."],
+ ["laster","pronto / enseguida","Lokailuak",2,"Laster arte! = ¡hasta pronto!"],
+ ["sarri","a menudo","Lokailuak",3,"Sinónimo: maiz."],
+ ["inoiz","nunca / alguna vez","Lokailuak",3,"Con negación es «nunca» (ez dut inoiz ikusi); en pregunta, «alguna vez»."]]
+];
+const BANK=[]; BANK_DAYS.forEach((day,d)=>day.forEach(([eu,es,cat,maila,nota,ex],i)=>BANK.push({id:"k-"+d+"-"+i,eu,es,cat,maila,nota,ex,type:"word"})));
+function ensureDaily(){
+  S.unl=S.unl||{};
+  // migración: las 30 del 29-10-2026 ya se mostraron ese día
+  const t=today();
+  if(!S.unl[t]){
+    const used=new Set(Object.values(S.unl).flat());
+    const next=BANK.filter(b=>!used.has(b.id)).slice(0,30).map(b=>b.id);
+    if(next.length){S.unl[t]=next;save()}
+  }
+  const dayOf={}; Object.entries(S.unl).forEach(([d,ids])=>ids.forEach(id=>dayOf[id]=d));
+  DAILY=BANK.filter(b=>dayOf[b.id]).map(b=>({...b,day:dayOf[b.id]}));
+}
+const bankLeft=()=>{const used=new Set(Object.values(S.unl||{}).flat());return BANK.filter(b=>!used.has(b.id)).length};
+
+/* ---------- TEST DE VERBOS (sin IA): frases escritas a mano + conjugación por tabla ---------- */
+/* verbo: [forma -t(z)en, futuro, auxiliar tr=ukan / in=izan] */
+const VFORMS={jan:["jaten","jango","tr"],edan:["edaten","edango","tr"],erosi:["erosten","erosiko","tr"],ikusi:["ikusten","ikusiko","tr"],egin:["egiten","egingo","tr"],ikasi:["ikasten","ikasiko","tr"],irakatsi:["irakasten","irakatsiko","tr"],ahaztu:["ahazten","ahaztuko","tr"],gogoratu:["gogoratzen","gogoratuko","tr"],saiatu:["saiatzen","saiatuko","in"],lortu:["lortzen","lortuko","tr"],aurkitu:["aurkitzen","aurkituko","tr"],galdu:["galtzen","galduko","tr"],itxaron:["itxaroten","itxarongo","tr"],erabaki:["erabakitzen","erabakiko","tr"],konpondu:["konpontzen","konponduko","tr"],ulertu:["ulertzen","ulertuko","tr"],utzi:["uzten","utziko","tr"],eskatu:["eskatzen","eskatuko","tr"],garatu:["garatzen","garatuko","tr"],baieztatu:["baieztatzen","baieztatuko","tr"],ukatu:["ukatzen","ukatuko","tr"],onartu:["onartzen","onartuko","tr"],saihestu:["saihesten","saihestuko","tr"],iradoki:["iradokitzen","iradokiko","tr"],nabarmendu:["nabarmentzen","nabarmenduko","tr"],harritu:["harritzen","harrituko","in"],zehaztu:["zehazten","zehaztuko","tr"],aldarrikatu:["aldarrikatzen","aldarrikatuko","tr"],gauzatu:["gauzatzen","gauzatuko","tr"],bultzatu:["bultzatzen","bultzatuko","tr"],ezkutatu:["ezkutatzen","ezkutatuko","tr"],egiaztatu:["egiaztatzen","egiaztatuko","tr"],sendatu:["sendatzen","sendatuko","in"],jaso:["jasotzen","jasoko","tr"],bidali:["bidaltzen","bidaliko","tr"],aitortu:["aitortzen","aitortuko","tr"],ospatu:["ospatzen","ospatuko","tr"],eragin:["eragiten","eragingo","tr"],aurreikusi:["aurreikusten","aurreikusiko","tr"],etorri:["etortzen","etorriko","in"],joan:["joaten","joango","in"],saldu:["saltzen","salduko","tr"],idatzi:["idazten","idatziko","tr"],irakurri:["irakurtzen","irakurriko","tr"],ordaindu:["ordaintzen","ordainduko","tr"],itxi:["ixten","itxiko","tr"],ireki:["irekitzen","irekiko","tr"],amaitu:["amaitzen","amaituko","tr"],entzun:["entzuten","entzungo","tr"],esan:["esaten","esango","tr"],garbitu:["garbitzen","garbituko","tr"],prestatu:["prestatzen","prestatuko","tr"],pentsatu:["pentsatzen","pentsatuko","tr"],ibili:["ibiltzen","ibiliko","in"],irten:["irteten","irtengo","in"],esnatu:["esnatzen","esnatuko","in"]};
+/* [castellano, comienzo de la frase en euskera, sujeto, objeto sg/pl ("" si intransitivo), tiempo perf/past/hab/fut] */
+const VT={
+ jan:[["He comido las alubias.","Babarrunak","ni","pl","perf"],["Mañana comeremos pescado.","Bihar arraina","gu","sg","fut"]],
+ edan:[["Ayer bebí mucha agua.","Atzo ur asko","ni","sg","past"]],
+ erosi:[["Cada semana compramos pan.","Astero ogia","gu","sg","hab"],["Han comprado dos sillas.","Bi aulki","haiek","pl","perf"]],
+ ikusi:[["Vimos el mar.","Itsasoa","gu","sg","past"]],
+ egin:[["Hago los deberes por la tarde.","Arratsaldean etxeko lanak","ni","pl","hab"]],
+ ikasi:[["Estudio euskera todos los días.","Egunero euskara","ni","sg","hab"]],
+ irakatsi:[["Ella enseña matemáticas.","Matematika","hura","sg","hab"]],
+ ahaztu:[["He olvidado las llaves.","Giltzak","ni","pl","perf"]],
+ gogoratu:[["Recordarás su nombre.","Bere izena","zu","sg","fut"]],
+ saiatu:[["Lo intentaremos otra vez.","Berriro","gu","","fut"]],
+ lortu:[["Han conseguido el objetivo.","Helburua","haiek","sg","perf"]],
+ aurkitu:[["Encontré la solución.","Konponbidea","ni","sg","past"]],
+ galdu:[["Hemos perdido el partido.","Partida","gu","sg","perf"]],
+ itxaron:[["Esperé una hora.","Ordubete","ni","sg","past"]],
+ erabaki:[["Mañana lo decidiremos.","Bihar","gu","sg","fut"]],
+ konpondu:[["Ellos arreglan coches.","Autoak","haiek","pl","hab"]],
+ ulertu:[["Has entendido la pregunta.","Galdera","zu","sg","perf"]],
+ utzi:[["Dejé los libros en la mesa.","Liburuak mahai gainean","ni","pl","past"]],
+ eskatu:[["Pediremos dos cafés.","Bi kafe","gu","pl","fut"]],
+ garatu:[["La empresa desarrolla productos nuevos.","Enpresak produktu berriak","hura","pl","hab"]],
+ baieztatu:[["El médico ha confirmado la noticia.","Medikuak albistea","hura","sg","perf"]],
+ ukatu:[["Él lo negó todo.","Dena","hura","sg","past"]],
+ onartu:[["Hemos aceptado las condiciones.","Baldintzak","gu","pl","perf"]],
+ saihestu:[["Evitamos los problemas.","Arazoak","gu","pl","hab"]],
+ iradoki:[["Ella sugirió una idea.","Ideia bat","hura","sg","past"]],
+ nabarmendu:[["El informe destaca dos datos.","Txostenak bi datu","hura","pl","hab"]],
+ harritu:[["Me sorprendí mucho.","Asko","ni","","past"]],
+ zehaztu:[["Concretaremos la fecha.","Data","gu","sg","fut"]],
+ aldarrikatu:[["Reivindican sus derechos.","Beren eskubideak","haiek","pl","hab"]],
+ gauzatu:[["Hemos llevado a cabo el proyecto.","Proiektua","gu","sg","perf"]],
+ bultzatu:[["El ayuntamiento impulsará el euskera.","Udalak euskara","hura","sg","fut"]],
+ ezkutatu:[["Escondí las llaves.","Giltzak","ni","pl","past"]],
+ egiaztatu:[["Ellos comprueban los datos.","Datuak","haiek","pl","hab"]],
+ sendatu:[["Me he curado del todo.","Guztiz","ni","","perf"]],
+ jaso:[["He recibido tu mensaje.","Zure mezua","ni","sg","perf"]],
+ bidali:[["Ayer enviaron las cartas.","Atzo gutunak","haiek","pl","past"]],
+ aitortu:[["Confesó su error.","Bere akatsa","hura","sg","past"]],
+ ospatu:[["Celebraremos el cumpleaños.","Urtebetetzea","gu","sg","fut"]],
+ eragin:[["La tormenta causó grandes daños.","Ekaitzak kalte handiak","hura","pl","past"]],
+ aurreikusi:[["Previmos el problema.","Arazoa","gu","sg","past"]],
+ etorri:[["Vendrán mañana.","Bihar","haiek","","fut"]],
+ joan:[["Vamos al monte cada domingo.","Igandero mendira","gu","","hab"]],
+ saldu:[["Vendieron la casa.","Etxea","haiek","sg","past"]],
+ idatzi:[["He escrito una carta.","Gutun bat","ni","sg","perf"]],
+ irakurri:[["Leeré el periódico.","Egunkaria","ni","sg","fut"]],
+ ordaindu:[["Ayer pagamos la cuenta.","Atzo kontua","gu","sg","past"]],
+ itxi:[["Cierran la tienda a las ocho.","Zortzietan denda","haiek","sg","hab"]],
+ ireki:[["He abierto la ventana.","Leihoa","ni","sg","perf"]],
+ amaitu:[["He terminado el trabajo.","Lana","ni","sg","perf"]],
+ entzun:[["Escuchamos música todos los días.","Egunero musika","gu","sg","hab"]],
+ esan:[["Dijo la verdad.","Egia","hura","sg","past"]],
+ garbitu:[["Limpian las calles.","Kaleak","haiek","pl","hab"]],
+ prestatu:[["Prepararé la cena.","Afaria","ni","sg","fut"]],
+ pentsatu:[["Lo he pensado bien.","Ondo","ni","sg","perf"]],
+ ibili:[["Ayer caminamos mucho.","Atzo asko","gu","","past"]],
+ irten:[["Salí temprano de casa.","Goiz etxetik","ni","","past"]],
+ esnatu:[["Me desperté muy pronto.","Oso goiz","ni","","past"]]
+};
+const AUX_TR={pres:{ni:["dut","ditut"],zu:["duzu","dituzu"],hura:["du","ditu"],gu:["dugu","ditugu"],haiek:["dute","dituzte"]},
+              past:{ni:["nuen","nituen"],zu:["zenuen","zenituen"],hura:["zuen","zituen"],gu:["genuen","genituen"],haiek:["zuten","zituzten"]}};
+const AUX_IN={pres:{ni:"naiz",zu:"zara",hura:"da",gu:"gara",haiek:"dira"},past:{ni:"nintzen",zu:"zinen",hura:"zen",gu:"ginen",haiek:"ziren"}};
+const SUBJ_ES={ni:"yo",zu:"tú",hura:"él / ella",gu:"nosotros",haiek:"ellos"};
+const TDESC={perf:"Es pretérito perfecto: participio + auxiliar en presente.",past:"Es pasado: participio + auxiliar en pasado.",hab:"Es presente habitual: forma en -t(z)en + auxiliar en presente.",fut:"Es futuro: participio con -ko / -go + auxiliar en presente."};
+const vkey=it=>{const k=alts(it.eu)[0];return VT[k]&&VFORMS[k]?k:null};
+const hasVT=it=>it&&it.type==="word"&&!!vkey(it);
+function vSentence(k,pre,subj,obj,t,auxType){
+  const [imp,fut]=VFORMS[k]; const vf=t==="hab"?imp:t==="fut"?fut:k;
+  const tt=t==="past"?"past":"pres";
+  const aux=auxType==="tr"?AUX_TR[tt][subj][obj==="pl"?1:0]:AUX_IN[tt][subj];
+  const txt=(pre?pre+" ":"")+vf+" "+aux+".";
+  return {txt:txt.charAt(0).toUpperCase()+txt.slice(1),aux};
+}
+function buildVT(it){
+  const k=vkey(it); if(!k) return null;
+  const list=VT[k]; S.vtIdx=S.vtIdx||{}; const n=(S.vtIdx[k]||0)%list.length; S.vtIdx[k]=n+1;
+  const [es,pre,subj,obj,t]=list[n]; const at=VFORMS[k][2];
+  const right=vSentence(k,pre,subj,obj,t,at);
+  const other={ni:"gu",gu:"ni",hura:"haiek",haiek:"hura",zu:"ni"}[subj];
+  const swapT={perf:"past",past:"perf",hab:"perf",fut:"hab"}[t];
+  const c=[vSentence(k,pre,subj,obj,swapT,at).txt];
+  if(at==="tr"){c.push(vSentence(k,pre,subj,obj==="pl"?"sg":"pl",t,at).txt);c.push(vSentence(k,pre,other,obj,t,at).txt)}
+  else{c.push(vSentence(k,pre,other,"",t,at).txt);c.push(vSentence(k,pre,subj,"sg",t,"tr").txt)}
+  c.push(vSentence(k,pre,subj,obj,t==="fut"?"past":"fut",at).txt);
+  const wrong=[...new Set(c)].filter(x=>x!==right.txt).slice(0,3);
+  const az=TDESC[t]+" "+(at==="tr"
+    ?`Lleva el auxiliar ukan (${right.aux}) porque el sujeto (${SUBJ_ES[subj]}) actúa sobre algo${obj==="pl"?"; el objeto es plural, por eso lleva -it-":""}.`
+    :`Lleva el auxiliar izan (${right.aux}) porque el verbo es intransitivo; sujeto: ${SUBJ_ES[subj]}.`);
+  return {es,opts:[right.txt,...wrong],ok:0,azalpena:az};
+}
+
+/* ---------- REVISIÓN ORTOGRÁFICA LOCAL (norma del batua, sin IA) ---------- */
+function lintEu(word){
+  const w=String(word); const notes=[]; let fix=w;
+  const rep=(re,to,msg)=>{if(re.test(fix)){fix=fix.replace(re,to);if(!notes.includes(msg))notes.push(msg)}};
+  rep(/[áéíóú]/gi,m=>({á:"a",é:"e",í:"i",ó:"o",ú:"u",Á:"A",É:"E",Í:"I",Ó:"O",Ú:"U"}[m]),"En euskera batua no se usan tildes.");
+  rep(/ch/gi,m=>m[0]==="C"?"Tx":"tx","El sonido «ch» se escribe tx.");
+  rep(/qu/gi,m=>m[0]==="Q"?"K":"k","«qu» se escribe k.");
+  rep(/c(?=[ei])/gi,m=>m==="C"?"Z":"z","«ce, ci» se escriben ze, zi.");
+  rep(/c/gi,m=>m==="C"?"K":"k","La c se escribe k.");
+  if(/ll/i.test(fix)) notes.push("La «ll» no se usa en batua: según la palabra, se escribe il o l. Revisa la forma en el diccionario.");
+  rep(/v/gi,m=>m==="V"?"B":"b","La v se escribe b.");
+  rep(/y/gi,m=>m==="Y"?"I":"i","La y se escribe i.");
+  rep(/w/gi,m=>m==="W"?"U":"u","La w no se usa en palabras vascas.");
+  return {fix,notes};
+}
+function localReview(list,box,commit){
+  const known=items().filter(i=>i.type==="word");
+  const res=list.map(x=>{
+    const {fix,notes}=x.type==="word"?lintEu(x.eu):{fix:x.eu,notes:[]};
+    const k=alts(fix)[0]; let dup=null, near=null;
+    if(x.type==="word"){
+      dup=known.find(i=>alts(i.eu).some(a=>euEq(a,k)));
+      if(!dup) near=known.find(i=>alts(i.eu).some(a=>{const A=keyEu(a),B=keyEu(k);return B.length>=4&&lev(A,B)===1}));
+    }
+    return {...x,fix,notes,dup,near};
+  });
+  const flagged=res.filter(r=>r.notes.length||r.dup||r.near);
+  if(!flagged.length){commit(list,list.length>1?`${list.length} gehituta`:`Gehituta: ${list[0].eu}`);return}
+  box.hidden=false;
+  box.innerHTML=flagged.map(r=>`<div class="review">
+     ${r.notes.length?`<div class="fix"><s>${esc(r.eu)}</s> → <ins>${esc(r.fix)}</ins></div><p>${esc(r.notes.join(" "))}</p>`:""}
+     ${r.dup?`<p><b>Ya la tienes:</b> ${esc(r.dup.eu)} = ${esc(r.dup.es)}. No se añadirá dos veces.</p>`:""}
+     ${r.near?`<p><b>¿Querías decir</b> ${esc(r.near.eu)} (${esc(r.near.es)})?</p>`:""}
+   </div>`).join("")+`
+   <div class="row2"><button type="button" class="big ghost" id="rv-mine">Gorde nirea</button><button type="button" class="big" id="rv-ok">Gorde zuzenduta</button></div>
+   <p class="sub" style="margin:0">Revisión ortográfica automática. Si dudas, consulta <a href="https://www.euskaltzaindia.eus/hiztegibatua" target="_blank" rel="noopener" style="color:var(--accent)">el Hiztegi Batua de Euskaltzaindia</a>.</p>`;
+  $("#rv-ok").onclick=()=>{const keep=res.filter(r=>!r.dup).map(r=>({...r,eu:r.fix}));if(keep.length)commit(keep,`Gordeta: ${keep.length}`);else{box.hidden=true;toast("Ya las tenías todas")}};
+  $("#rv-mine").onclick=()=>{const keep=res.filter(r=>!r.dup);if(keep.length)commit(keep,`Gordeta: ${keep.length}`);else{box.hidden=true;toast("Ya las tenías todas")}};
+}
+
+/* ---------- CORRECTOR (Euskaltzaindia) ---------- */
+let sampleFn=null;
+/* La app no usa IA: todo funciona dentro de la página */
+function addItem(eu,es,cat,type,ex){
+  const it={id:"m-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),eu,es,cat,type,mine:true};
+  if(ex) it.ex=ex;
+  if(type==="esaera"){const ws=eu.split(/[\s,.;!?¡¿«»]+/).filter(w=>w.length>=4);if(ws.length) it.gap=ws.sort((a,b)=>b.length-a.length)[0]}
+  S.mine.push(it);
+}
+
+/* ---------- PROGRESO ---------- */
+let pendingReset=false;
+function renderProg(){
+  const all=items(); const learned=all.filter(i=>P(i.id).box>=3).length;
+  const seen=all.filter(i=>{const p=S.prog[i.id];return p&&(p.r+p.w)>0});
+  const hard=seen.filter(i=>P(i.id).w>0).sort((a,b)=>(P(b.id).w-P(b.id).r)-(P(a.id).w-P(a.id).r)).slice(0,8);
+  const cats=[...new Set(all.map(i=>i.cat))];
+  $("#app").innerHTML=topBar()+`
+  <section style="display:flex;flex-direction:column;gap:4px"><h2 style="font-size:26px">Aurrerapena</h2><p class="sub" style="margin:0">Una palabra cuenta como aprendida cuando la aciertas 3 veces seguidas.</p></section>
+  <div class="stats"><div class="stat"><b>${learned}</b><span>Ikasita</span></div><div class="stat"><b>${S.survBest||0}</b><span>Errekorra</span></div><div class="stat"><b>${S.best}</b><span>Racha máx.</span></div></div>
+  <section class="panel"><div class="level-row"><div class="eyebrow">Dominak · Medallas</div><span class="sub">${Object.keys(S.medals).length}/${MEDALS.length}</span></div>
+    <div class="medals">${MEDALS.map(([id,n,d])=>`<div class="medal${S.medals[id]?" on":""}"><svg><use href="#i-medal"/></svg><b>${esc(n)}</b><span>${esc(d)}</span></div>`).join("")}</div>
+  </section>
+  <section class="panel"><div class="eyebrow">Mailaka · Por nivel</div>
+    ${[1,2,3,4,5].map(l=>{const p=lvlProgress(l);return `<div class="catrow"><span>${MAILA_NAMES[l].split(" · ").join(" ")}</span><div class="bar"><i style="width:${Math.round(p.ok/p.total*100)}%"></i></div><em>${p.ok}/${p.total}</em></div>`}).join("")}
+    <p class="sub" style="margin:0">Subes de nivel al dominar el 70 % de las palabras del tuyo.</p>
+  </section>
+  <section class="panel"><div class="eyebrow">Gaika · Por tema</div>
+    ${cats.map(c=>{const l=all.filter(i=>i.cat===c);const d=l.filter(i=>P(i.id).box>=3).length;return `<div class="catrow"><span style="overflow-wrap:anywhere">${esc(c)}</span><div class="bar"><i style="width:${Math.round(d/l.length*100)}%"></i></div><em>${d}/${l.length}</em></div>`}).join("")}
+  </section>
+  <section class="panel"><div class="eyebrow">Zailenak · Las que más te cuestan</div>
+    ${hard.length?`<div class="list">${hard.map(m=>`<div class="li"><div class="t"><b>${esc(m.eu)}</b><span>${esc(m.es)}</span></div><span class="sub" style="font-variant-numeric:tabular-nums">${P(m.id).r}✓ ${P(m.id).w}✗</span></div>`).join("")}</div>`:`<p class="sub" style="margin:0">Juega unas partidas y aquí verás las palabras que más fallas.</p>`}
+  </section>
+  <button class="big ${pendingReset?"danger":"ghost"}" id="reset">${pendingReset?"Toca otra vez para borrar el progreso":"Reiniciar progreso"}</button>
+  <p class="sub" style="margin:0;text-align:center">Tus palabras y progreso se guardan en este dispositivo.</p>`;
+  $("#reset").onclick=()=>{if(!pendingReset){pendingReset=true;renderProg();setTimeout(()=>{if(pendingReset){pendingReset=false;if(tab==="prog")renderProg()}},3000);return}
+    S.prog={};S.xp=0;S.streak=0;S.best=0;S.lastDay=null;S.stats={};S.medals={};S.survBest=0;S.daily={};pendingReset=false;save();toast("Progreso reiniciado");renderProg()};
+}
+
+/* Botón «atrás» de Android: cierra la partida o vuelve al inicio */
+window.hjBack=()=>{ if(G){closeGame();return true} if(tab!=="home"){tab="home";render();window.scrollTo(0,0);return true} return false };
+ensureDaily();
+render();
+</script>
+</body></html>
