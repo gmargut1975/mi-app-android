@@ -253,6 +253,22 @@ textarea.field{min-height:110px;resize:vertical;font-family:ui-monospace,Menlo,m
 .bonus-in.verb{border-color:var(--accent)}
 .bonus-tag.vt{background:var(--accent);color:var(--accent-ink)}
 .letter{font-weight:700;color:var(--muted);margin-right:4px}
+.gram-eu{font-family:var(--display);font-size:clamp(20px,5.6vw,24px);font-weight:500;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
+.gapw{display:inline-block;min-width:2.6em;padding:0 .25em;border-bottom:3px solid var(--accent);color:var(--accent);font-weight:700}
+.gapw.empty{color:var(--muted)}.gapw.good{color:var(--accent)}.gapw.bad{color:var(--red);border-color:var(--red)}
+.opts.g2{grid-template-columns:1fr 1fr}
+.ghost{display:flex;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;padding-bottom:4px}
+.ghost .prompt,#gob .prompt{flex:none;justify-content:flex-start;padding-top:12px}
+.gt{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface);border-radius:12px;overflow:hidden}
+.gt th,.gt td{padding:6px 10px;text-align:left;border-bottom:1px solid var(--surface2);overflow-wrap:anywhere}
+.gt thead th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.gt tbody th{color:var(--muted);font-weight:600;width:34%}
+.gt tr.on td,.gt tr.on th,.gt td.on{background:var(--good-soft);color:var(--accent);font-weight:700}
+.grams{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gbtn{padding:10px 4px;border-radius:12px;background:var(--surface2);font-weight:700;font-size:14px;box-shadow:0 3px 0 var(--line)}
+.gbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.bonus-in.gram{border-color:var(--accent);max-height:100%;overflow-y:auto}
+.bonus-tag.gtag{background:var(--accent);color:var(--accent-ink)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -347,7 +363,7 @@ BASE_ESAERAK.forEach(([eu,es,gap],i)=>DEFAULT_ITEMS.push({id:"e-"+i,eu,es,cat:"E
 const KEY="hitzjoko-v1";
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.prog)return s}catch(e){}return null}
 let S = load() || {mine:[],prog:{},xp:0,streak:0,lastDay:null,dir:"eu",cat:"all",best:0};
-S.stats=S.stats||{};S.lvl=S.lvl||1;S.medals=S.medals||{};if(S.sound===undefined)S.sound=true;
+S.stats=S.stats||{};S.lvl=S.lvl||1;if(!S.diff)S.diff=2;S.medals=S.medals||{};if(S.sound===undefined)S.sound=true;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 let DAILY=[], DBX=null; /* DAILY se llena desde el banco local */
 const items=()=>DEFAULT_ITEMS.concat(DAILY,S.mine);
@@ -422,6 +438,8 @@ function renderHome(){
   ${(()=>{const p=lvlProgress();return `<section class="level">
     <div class="level-row"><strong>${MAILA_NAMES[S.lvl]}</strong><span class="sub">${S.lvl<5?`${p.ok}/${p.need} para subir`:"Nivel máximo"}</span></div>
     <div class="bar"><i style="width:${S.lvl<5?Math.min(100,Math.round(p.ok/p.need*100)):100}%"></i></div>
+    <div class="seg" id="diff">${["Normala","Zaila","Oso zaila"].map((t,k)=>`<button data-d="${k+1}" aria-pressed="${S.diff===k+1}">${t}</button>`).join("")}</div>
+    <p class="sub" style="margin:0">${["Más tiempo, 3 vidas y se aceptan erratas pequeñas.","Menos tiempo, sin erratas, opciones más parecidas y una pregunta de gramática cada 5 aciertos.","Aún menos tiempo, 2 vidas, dirección al azar y gramática escrita a mano."][S.diff-1]}</p>
     <div class="lvls" id="lvls">${[1,2,3,4,5].map(l=>`<button class="lv${l===S.lvl?" cur":""}${l<S.lvl?" done":""}" data-l="${l}" aria-pressed="${l===S.lvl}">${MAILA_NAMES[l].split(" ")[0]}</button>`).join("")}</div>
     <div class="level-row"><span class="sub">${ic("star")} ${L.l}. jokalari-maila · ${LEVEL_NAMES[Math.min(L.l-1,LEVEL_NAMES.length-1)]}</span><span class="sub">${L.cur}/${L.need} XP</span></div>
   </section>`})()}
@@ -444,10 +462,16 @@ function renderHome(){
     </div>
     <button class="mode" data-mode="quiz"><span class="ic">${ic("bolt")}</span><b>Azkar!</b><span>Elige la traducción entre 4 opciones.</span></button>
     <button class="mode" data-mode="cards"><span class="ic">${ic("cards")}</span><b>Txartelak</b><span>Tarjetas para repasar a tu ritmo.</span></button>
+    <div class="mode gram-card" style="grid-column:1/-1;gap:12px">
+      <div style="display:flex;align-items:center;gap:14px"><span class="ic">${ic("pen")}</span><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>Gramatika</b><span>Conjuga verbos y declina palabras en frases reales. 12 preguntas, según tu nivel ${MAILA_NAMES[S.lvl].split(" ")[0]}.</span></div></div>
+      <div class="grams">${Object.entries(GRAM_NAMES).map(([k,v])=>`<button class="gbtn" data-gram="${k}">${v}</button>`).join("")}</div>
+    </div>
     <button class="mode" data-mode="esaera" style="grid-column:1/-1"><span class="ic">${ic("quote")}</span><b>Esaerak</b><span>Completa refranes y expresiones y descubre su significado. ${esaerak().length} en total.</span></button>
   </section>`;
   $("#cats").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{S.cat=b.dataset.cat;save();renderHome()});
   $("#dir").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.dir=b.dataset.dir;save();renderHome()});
+  $("#diff").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.diff=+b.dataset.d;save();renderHome()});
+  document.querySelectorAll("[data-gram]").forEach(b=>b.onclick=()=>startGram(b.dataset.gram));
   $("#lvls").querySelectorAll("button").forEach(b=>b.onclick=()=>{const l=+b.dataset.l;if(l===S.lvl)return;S.lvl=l;save();syncSettings();toast(`Nivel ${MAILA_NAMES[l]}`);renderHome()});
   const nd=$("#newday"); if(nd) nd.onclick=()=>{S.cat="today";save();start("write")};
   $("#secs").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.secs=+b.dataset.s;save();renderHome()});
@@ -464,14 +488,14 @@ function start(mode){
   const minN = mode==="cards"||mode==="write"?1:4;
   if(list.length<minN){toast(type==="esaera"?"Añade al menos 4 esaerak":"Esta categoría necesita al menos 4 palabras");return}
   const n = mode==="cards"?Math.min(15,list.length):Math.min(10,list.length);
-  G={mode,list,qs:pick(list,n),i:0,hearts:3,combo:0,xp:0,right:0,missed:[]};
+  G={mode,list,qs:pick(list,n),i:0,hearts:maxHearts(),maxH:maxHearts(),combo:0,xp:0,right:0,missed:[]};
   touchStreak(); save(); renderGame();
 }
 function closeGame(){cancelAnimationFrame(timerRAF);document.querySelectorAll(".bonus").forEach(b=>b.remove());G=null;$("#layer").innerHTML="";render()}
 function shell(inner){
   const pct=Math.round(G.i/G.qs.length*100);
   G.fast=G.fast||0;
-  const hearts = G.mode!=="cards" ? `<div class="hearts" aria-label="${G.hearts} vidas">${[0,1,2].map(k=>ic("heart",k<G.hearts?"":"off")).join("")}</div>`:`<span class="sub" style="font-variant-numeric:tabular-nums">${G.i+1}/${G.qs.length}</span>`;
+  const hearts = G.mode!=="cards" ? `<div class="hearts" aria-label="${G.hearts} vidas">${[...Array(G.maxH||3)].map((_,k)=>ic("heart",k<G.hearts?"":"off")).join("")}</div>`:`<span class="sub" style="font-variant-numeric:tabular-nums">${G.i+1}/${G.qs.length}</span>`;
   $("#layer").innerHTML=`<div class="game"><div class="game-in">
     <div class="ghead"><button class="x" id="quit" aria-label="Salir">${ic("x")}</button><div class="bar"><i style="width:${pct}%"></i></div>${hearts}</div>
     <div class="combo">${G.combo>=3?`${G.combo} segidan!`:""}</div>
@@ -482,7 +506,7 @@ function renderGame(){
   if(G.i>=G.qs.length||G.hearts<=0) return endGame();
   if(G.mode==="quiz"&&G.verbNext&&G.hearts>0){const v=G.verbNext;G.verbNext=null;return verbTest(v,()=>renderGame())}
   if(G.mode==="quiz"&&(S.esCount||0)>=ES_EVERY&&pool('esaera').length>=4) return esaeraBonus(()=>renderGame());
-  ({quiz:qQuiz,esaera:qEsaera,cards:qCard})[G.mode]();
+  ({quiz:qQuiz,esaera:qEsaera,cards:qCard,gram:qGram})[G.mode]();
 }
 function award(ok,it){
   mark(it,ok);
@@ -505,9 +529,11 @@ const BAD_MSG=["Ez da hori","Ia-ia...","Hurrengoan!"];
 const rnd=a=>a[Math.random()*a.length|0];
 
 function qQuiz(){
-  const it=G.qs[G.i]; const toEs=S.dir==="eu";
+  const it=G.qs[G.i]; const toEs=S.diff===3?Math.random()<.5:S.dir==="eu";
   const q=toEs?it.eu:it.es, ans=toEs?it.es:it.eu;
-  const distract=shuffle(G.list.filter(x=>x.id!==it.id&&!sharesMeaning(x,it))).slice(0,3).map(x=>toEs?x.es:x.eu);
+  let cand=G.list.filter(x=>x.id!==it.id&&!sharesMeaning(x,it));
+  if(S.diff>=2){const A=norm(alts(ans)[0]);const sc=x=>{const B=norm(alts(toEs?x.es:x.eu)[0]);return (x.cat===it.cat?0:2)+lev(A,B)/Math.max(A.length,B.length)+Math.random()*.6};cand=cand.sort((a,b)=>sc(a)-sc(b)).slice(0,6)}
+  const distract=shuffle(cand).slice(0,3).map(x=>toEs?x.es:x.eu);
   const opts=shuffle([ans,...distract]);
   shell(`<div class="prompt"><div class="eyebrow">${toEs?"Zer esan nahi du?":"Nola esaten da euskaraz?"}</div><div class="q">${esc(q)}</div><div class="sub">${esc(it.cat)}</div></div>
   <div class="opts">${opts.map(o=>`<button class="opt">${esc(o)}</button>`).join("")}</div>`);
@@ -578,6 +604,7 @@ function accepted(it,toEs){
 const sharesMeaning=(a,b)=>alts(a.es).some(x=>alts(b.es).some(y=>esEq(x,y)))||alts(a.eu).some(x=>alts(b.eu).some(y=>euEq(x,y)));
 function check(input,list,toEs){
   const eq=toEs?esEq:euEq; const hit=list.find(a=>eq(input,a)); if(hit) return {ok:true,hit,typo:false};
+  if(S.diff>=2) return {ok:false};
   const k=toEs?keyEs:keyEu; const v=k(input);
   const near=list.find(a=>{const t=k(a);return t.length>=5&&lev(v,t)<=1});
   return near?{ok:true,hit:near,typo:true}:{ok:false};
@@ -629,13 +656,13 @@ function seeded(seed){let h=1779033703^seed.length;for(let i=0;i<seed.length;i++
 function dailyWords(){const r=seeded("hitz-"+today()+"-"+S.lvl);const l=DEFAULT_ITEMS.filter(i=>i.type==="word"&&i.maila<=S.lvl).slice();
   for(let i=l.length-1;i>0;i--){const j=r()*(i+1)|0;[l[i],l[j]]=[l[j],l[i]]}return l.slice(0,10)}
 function dailyDir(){return seeded("dir-"+today())()<.5?"eu":"es"}
-const survSecs=r=>Math.max(4,(13-S.lvl)-r*.4);
+const survSecs=r=>Math.max(3,((13-S.lvl)-r*.4)*DM());
 
 function startTyped(mode){
   const list = mode==="daily"?dailyWords():pool("word");
   if(!list.length){toast("Esta categoría no tiene palabras");return}
   const n = mode==="surv"?Infinity:Math.min(10,list.length);
-  G={mode,list,qs:mode==="surv"?[]:(mode==="daily"?list:pick(list,n)),total:n,i:0,hearts:3,combo:0,xp:0,right:0,missed:[],freeze:1,fast:0,
+  G={mode,list,qs:mode==="surv"?[]:(mode==="daily"?list:pick(list,n)),total:n,i:0,hearts:maxHearts(),maxH:maxHearts(),sinceGram:0,combo:0,xp:0,right:0,missed:[],freeze:1,fast:0,
      dir: mode==="daily"?dailyDir():S.dir};
   touchStreak(); save();
   $("#layer").innerHTML=`<div class="game"><div class="game-in">
@@ -645,14 +672,14 @@ function startTyped(mode){
     <div class="tbar"><i id="tb"></i></div>
     <div id="fb"></div>
     <form id="wf" style="display:flex;flex-direction:column;gap:10px" autocomplete="off">
-      <div class="powers"><button type="button" class="pw" id="pw-freeze">${ic("snow")}<span>Izoztu</span><em id="fz">1</em></button><button type="button" class="pw" id="pw-hint">${ic("eye")}<span>Pista</span><em>−5</em></button><button type="button" class="pw" id="pw-skip">${ic("skip")}<span>Pasa</span><em>♥</em></button></div>
+      <div class="powers"><button type="button" class="pw" id="pw-freeze">${ic("snow")}<span>Izoztu</span><em id="fz">1</em></button><button type="button" class="pw" id="pw-hint">${ic("eye")}<span>Pista</span><em>−${5*(S.diff||2)}</em></button><button type="button" class="pw" id="pw-skip">${ic("skip")}<span>Pasa</span><em>♥</em></button></div>
       <input class="inp" id="win" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" enterkeyhint="go">
       <button class="big" type="submit" id="go">Egiaztatu</button>
     </form></div></div>`;
   $("#quit").onclick=closeGame;
   $("#wf").onsubmit=e=>{e.preventDefault(); if(G.phase==="fb"){if(Date.now()<(G.waitUntil||0))return;return nextTyped()} if(!$("#win").value.trim()) return; finishTyped(false)};
   $("#pw-freeze").onclick=()=>{if(G.phase!=="ask"||G.freeze<1||G.frozen)return;G.freeze--;G.frozen=5;SFX.freeze();flash("Izoztuta! · +5 s");$("#tb").classList.add("ice");$("#clock").classList.add("ice");updHud();$("#win").focus()};
-  $("#pw-hint").onclick=()=>{if(G.phase!=="ask")return;const a=G.ans[0];G.hints=Math.min(a.length,G.hints+1);G.combo=0;G.xp=Math.max(0,G.xp-5);
+  $("#pw-hint").onclick=()=>{if(G.phase!=="ask")return;const a=G.ans[0];G.hints=Math.min(a.length,G.hints+1);G.combo=0;G.xp=Math.max(0,G.xp-5*(S.diff||2));
     $("#hint").textContent=a.split("").map((c,k)=>c===" "?" ":(k<G.hints?c:"_")).join("");updHud();$("#win").focus()};
   $("#pw-skip").onclick=()=>{if(G.phase==="ask")finishTyped(true,true)};
   nextTyped(true);
@@ -661,7 +688,7 @@ function updHud(){
   const mid=$("#hudmid"); if(!mid) return;
   if(G.mode==="surv") mid.innerHTML=`<div class="score"><b>${G.xp}</b><span>puntos · récord ${S.survBest||0}</span></div>`;
   else mid.innerHTML=`<div class="bar"><i style="width:${Math.round(G.i/G.total*100)}%"></i></div>`;
-  $("#hearts").innerHTML=[0,1,2].map(k=>ic("heart",k<G.hearts?"":"off")).join("");
+  $("#hearts").innerHTML=[...Array(G.maxH||3)].map((_,k)=>ic("heart",k<G.hearts?"":"off")).join("");
   const m=multOf(G.combo);
   $("#combo").innerHTML=G.combo>=2?`<span class="mult m${m}">x${m}</span> ${G.combo} segidan${G.combo>=5?" · su bizia!":""}`:"";
   $("#combo").innerHTML+=`<div class="esprog">${ic("quote")} Esaera bonusa ${Math.min(S.esCount||0,ES_EVERY)}/${ES_EVERY}</div>`;
@@ -669,6 +696,7 @@ function updHud(){
 }
 function nextTyped(first){
   if(!first) G.i++;
+  if(G.hearts>0&&S.diff>=2&&(G.mode==="surv"||G.mode==="write")&&(G.sinceGram||0)>=5){G.sinceGram=0;cancelAnimationFrame(timerRAF);G.phase="bonus";$("#win").readOnly=true;return gramOverlay(()=>{$("#win").readOnly=false;nextTyped(true)})}
   if(G.hearts>0&&G.verbNext){const v=G.verbNext;G.verbNext=null;cancelAnimationFrame(timerRAF);G.phase="bonus";$("#win").readOnly=true;return verbTest(v,()=>{$("#win").readOnly=false;nextTyped(true)})}
   if(G.hearts<=0 || G.i>=G.total) return endGame();
   if((S.esCount||0)>=ES_EVERY && pool('esaera').length>=4){cancelAnimationFrame(timerRAF);G.phase="bonus";$("#win").readOnly=true;return esaeraBonus(()=>{$("#win").readOnly=false;nextTyped(true)})}
@@ -682,7 +710,7 @@ function nextTyped(first){
       G.qs.push(pick(c,1)[0])}}
   const it=G.qs[G.i]; const toEs=G.dir==="eu";
   G.cur=it; G.ans=accepted(it,toEs); G.phase="ask"; G.hints=0; G.frozen=0;
-  G.secs = G.mode==="surv"?survSecs(G.right):G.mode==="daily"?10:(S.secs||10);
+  G.secs = G.mode==="surv"?survSecs(G.right):G.mode==="daily"?Math.round(10*DM()):(S.secs||10);
   const q=toEs?it.eu:it.es;
   $("#qeye").textContent=toEs?"Idatzi gaztelaniaz · Escribe en castellano":"Idatzi euskaraz · Escribe en euskera";
   const qe=$("#q"); qe.textContent=q; qe.className="q pop-in"+(q.length>18?" long":"");
@@ -716,7 +744,7 @@ function finishTyped(timeout,skipped){
   const list=`<span class="sub">${G.ans.length>1?"Respuestas válidas":"Respuesta"}:</span> ${G.ans.map(a=>`<span class="tag${r.hit===a?" hit":""}">${esc(a)}</span>`).join(" ")}`;
   let title,body,gain=0;
   if(r.ok){
-    G.combo++; G.right++; S.best=Math.max(S.best,G.combo); if(G.mode==='surv'){G.okIds=G.okIds||{};G.okIds[it.id]=1}
+    G.combo++; G.right++; G.sinceGram=(G.sinceGram||0)+1; S.best=Math.max(S.best,G.combo); if(G.mode==='surv'){G.okIds=G.okIds||{};G.okIds[it.id]=1}
     S.stats.correct=(S.stats.correct||0)+1; S.esCount=(S.esCount||0)+1;
     if(used<2&&!G.hints){G.fast++;S.stats.fast=(S.stats.fast||0)+1}
     const m=multOf(G.combo); gain=(10+Math.round(Math.max(0,G.left)*2))*m; if(G.hints) gain=Math.round(gain/2);
@@ -773,6 +801,282 @@ function verbTest(it,done){
     });
   });
 }
+/* ================== GRAMATIKA: conjugación y declinación (sin IA) ================== */
+const PERS_EU=["ni","zu","hura","gu","zuek","haiek"];
+const PERS_ES=["Yo","Tú","Él","Nosotros","Vosotros","Ellos"];
+const PERS_ES_DAT=["A mí","A ti","A él","A nosotros","A vosotros","A ellos"];
+const PERS_EU_DAT=["niri","zuri","hari","guri","zuei","haiei"];
+const PERS_EU_ERG=["nik","zuk","hark","guk","zuek","haiek"];
+/* Paradigmas (orden: ni, zu, hura, gu, zuek, haiek) */
+const PARA={
+  izanPres:["naiz","zara","da","gara","zarete","dira"],
+  izanPast:["nintzen","zinen","zen","ginen","zineten","ziren"],
+  ukanPresSg:["dut","duzu","du","dugu","duzue","dute"],
+  ukanPresPl:["ditut","dituzu","ditu","ditugu","dituzue","dituzte"],
+  ukanPastSg:["nuen","zenuen","zuen","genuen","zenuten","zuten"],
+  ukanPastPl:["nituen","zenituen","zituen","genituen","zenituzten","zituzten"],
+  egonPres:["nago","zaude","dago","gaude","zaudete","daude"],
+  egonPast:["nengoen","zeunden","zegoen","geunden","zeundeten","zeuden"],
+  joanPres:["noa","zoaz","doa","goaz","zoazte","doaz"],
+  joanPast:["nindoan","zindoazen","zihoan","gindoazen","zindoazten","zihoazen"],
+  etorriPres:["nator","zatoz","dator","gatoz","zatozte","datoz"],
+  etorriPast:["nentorren","zentozen","zetorren","gentozen","zentozten","zetozen"],
+  edukiPres:["daukat","daukazu","dauka","daukagu","daukazue","daukate"],
+  edukiPast:["neukan","zeneukan","zeukan","geneukan","zeneukaten","zeukaten"],
+  jakinPres:["dakit","dakizu","daki","dakigu","dakizue","dakite"],
+  jakinPast:["nekien","zenekien","zekien","genekien","zenekiten","zekiten"],
+  ibiliPres:["nabil","zabiltza","dabil","gabiltza","zabiltzate","dabiltza"],
+  ibiliPast:["nenbilen","zenbiltzan","zebilen","genbiltzan","zenbiltzaten","zebiltzan"],
+  noriPresSg:["zait","zaizu","zaio","zaigu","zaizue","zaie"],
+  noriPresPl:["zaizkit","zaizkizu","zaizkio","zaizkigu","zaizkizue","zaizkie"],
+  noriPastSg:["zitzaidan","zitzaizun","zitzaion","zitzaigun","zitzaizuen","zitzaien"],
+  noriPastPl:["zitzaizkidan","zitzaizkizun","zitzaizkion","zitzaizkigun","zitzaizkizuen","zitzaizkien"],
+  diotPres:["diot","diozu","dio","diogu","diozue","diote"],
+  dietPres:["diet","diezu","die","diegu","diezue","diete"],
+  diotPast:["nion","zenion","zion","genion","zenioten","zioten"],
+  izanCond:["nintzateke","zinateke","litzateke","ginateke","zinatekete","lirateke"],
+  ukanCond:["nuke","zenuke","luke","genuke","zenukete","lukete"],
+  izanHip:["banintz","bazina","balitz","bagina","bazinete","balira"],
+  ukanHip:["banu","bazenu","balu","bagenu","bazenute","balute"]
+};
+const ES={
+  haber:["he","has","ha","hemos","habéis","han"],
+  llegarPret:["llegué","llegaste","llegó","llegamos","llegasteis","llegaron"],
+  salirPret:["salí","saliste","salió","salimos","salisteis","salieron"],
+  comprarPret:["compré","compraste","compró","compramos","comprasteis","compraron"],
+  darPret:["di","diste","dio","dimos","disteis","dieron"],
+  estar:["estoy","estás","está","estamos","estáis","están"],
+  estaba:["estaba","estabas","estaba","estábamos","estabais","estaban"],
+  ir:["voy","vas","va","vamos","vais","van"],
+  iba:["iba","ibas","iba","íbamos","ibais","iban"],
+  venir:["vengo","vienes","viene","venimos","venís","vienen"],
+  venia:["venía","venías","venía","veníamos","veníais","venían"],
+  tener:["tengo","tienes","tiene","tenemos","tenéis","tienen"],
+  tenia:["tenía","tenías","tenía","teníamos","teníais","tenían"],
+  saber:["sé","sabes","sabe","sabemos","sabéis","saben"],
+  sabia:["sabía","sabías","sabía","sabíamos","sabíais","sabían"],
+  andar:["ando","andas","anda","andamos","andáis","andan"],
+  andaba:["andaba","andabas","andaba","andábamos","andabais","andaban"],
+  me:["me","te","le","nos","os","les"],
+  iria:["iría","irías","iría","iríamos","iríais","irían"],
+  compraria:["compraría","comprarías","compraría","compraríamos","compraríais","comprarían"],
+  tuviera:["tuviera","tuvieras","tuviera","tuviéramos","tuvierais","tuvieran"],
+  viniera:["viniera","vinieras","viniera","viniéramos","vinierais","vinieran"]
+};
+const TIPS={
+  izan:"NOR (izan): verbos sin objeto directo (etorri, joan, iritsi, irten…).",
+  ukan:"NOR-NORK (ukan): el sujeto hace algo a un objeto. Objeto singular → du-; objeto plural → ditu-.",
+  syn:"Verbo sintético: se conjuga solo, sin auxiliar.",
+  nori:"NOR-NORI: «gustatu» concuerda con a quién le gusta (niri → -t, zuri → -zu…). Si lo que gusta es plural, lleva -zki-.",
+  nnn:"NOR-NORI-NORK: di- + a quién (-o- a él, -e- a ellos) + quién lo hace (-t, -zu, ø, -gu, -zue, -te).",
+  cond:"Baldintza (condicional): -ko/-go + nintzateke… (izan) o nuke… (ukan).",
+  hip:"Hipotesia: ba- + forma hipotética = «si yo…»."
+};
+/* Plantillas de conjugación: [id, nivel, paradigma, hermanos (distractores), tipo, eu, es(p) , tiempo] */
+const CONJ=[
+ ["izanPerf",1,"izanPres",["izanPast","ukanPresSg"],"izan","Goiz iritsi ___.",p=>`${PERS_ES[p]} ${ES.haber[p]} llegado pronto.`,"Orainaldi burutua · pretérito perfecto"],
+ ["ukanPerf",1,"ukanPresSg",["ukanPresPl","izanPres"],"ukan","Ogia erosi ___.",p=>`${PERS_ES[p]} ${ES.haber[p]} comprado el pan.`,"Orainaldi burutua · pretérito perfecto"],
+ ["egonPres",1,"egonPres",["egonPast","izanPres"],"syn","Etxean ___.",p=>`${PERS_ES[p]} ${ES.estar[p]} en casa.`,"Orainaldia · presente"],
+ ["izanPast",2,"izanPast",["izanPres","ukanPastSg"],"izan","Atzo goiz irten ___.",p=>`${PERS_ES[p]} ${ES.salirPret[p]} pronto ayer.`,"Lehenaldia · pasado"],
+ ["ukanPast",2,"ukanPastSg",["ukanPresSg","ukanPastPl"],"ukan","Atzo ogia erosi ___.",p=>`${PERS_ES[p]} ${ES.comprarPret[p]} el pan ayer.`,"Lehenaldia · pasado"],
+ ["ukanPerfPl",2,"ukanPresPl",["ukanPresSg","ukanPastPl"],"ukan","Liburuak irakurri ___.",p=>`${PERS_ES[p]} ${ES.haber[p]} leído los libros.`,"Orainaldi burutua · objeto plural"],
+ ["joanPres",2,"joanPres",["etorriPres","joanPast"],"syn","Hondartzara ___.",p=>`${PERS_ES[p]} ${ES.ir[p]} a la playa.`,"Orainaldia · presente"],
+ ["etorriPres",2,"etorriPres",["joanPres","etorriPast"],"syn","Lanetik ___.",p=>`${PERS_ES[p]} ${ES.venir[p]} del trabajo.`,"Orainaldia · presente"],
+ ["egonPast",3,"egonPast",["egonPres","izanPast"],"syn","Etxean ___.",p=>`${PERS_ES[p]} ${ES.estaba[p]} en casa.`,"Lehenaldia · pasado"],
+ ["joanPast",3,"joanPast",["joanPres","etorriPast"],"syn","Hondartzara ___.",p=>`${PERS_ES[p]} ${ES.iba[p]} a la playa.`,"Lehenaldia · pasado"],
+ ["etorriPast",3,"etorriPast",["etorriPres","joanPast"],"syn","Lanetik ___.",p=>`${PERS_ES[p]} ${ES.venia[p]} del trabajo.`,"Lehenaldia · pasado"],
+ ["edukiPres",3,"edukiPres",["edukiPast","jakinPres"],"syn","Auto bat ___.",p=>`${PERS_ES[p]} ${ES.tener[p]} un coche.`,"Orainaldia · presente"],
+ ["jakinPres",3,"jakinPres",["jakinPast","edukiPres"],"syn","Erantzuna ___.",p=>`${PERS_ES[p]} ${ES.saber[p]} la respuesta.`,"Orainaldia · presente"],
+ ["ibiliPres",3,"ibiliPres",["ibiliPast","egonPres"],"syn","Mendian ___.",p=>`${PERS_ES[p]} ${ES.andar[p]} por el monte.`,"Orainaldia · presente"],
+ ["noriPres",3,"noriPresSg",["noriPresPl","noriPastSg"],"nori","Txokolatea gustatzen ___.",p=>`${PERS_ES_DAT[p]} ${ES.me[p]} gusta el chocolate.`,"NOR-NORI · presente"],
+ ["noriPresPl",3,"noriPresPl",["noriPresSg","noriPastPl"],"nori","Sagarrak gustatzen ___.",p=>`${PERS_ES_DAT[p]} ${ES.me[p]} gustan las manzanas.`,"NOR-NORI · presente, plural"],
+ ["ukanPastPl",3,"ukanPastPl",["ukanPastSg","ukanPresPl"],"ukan","Atzo liburuak erosi ___.",p=>`${PERS_ES[p]} ${ES.comprarPret[p]} los libros ayer.`,"Lehenaldia · objeto plural"],
+ ["edukiPast",4,"edukiPast",["edukiPres","jakinPast"],"syn","Auto bat ___.",p=>`${PERS_ES[p]} ${ES.tenia[p]} un coche.`,"Lehenaldia · pasado"],
+ ["jakinPast",4,"jakinPast",["jakinPres","edukiPast"],"syn","Erantzuna ___.",p=>`${PERS_ES[p]} ${ES.sabia[p]} la respuesta.`,"Lehenaldia · pasado"],
+ ["ibiliPast",4,"ibiliPast",["ibiliPres","egonPast"],"syn","Mendian ___.",p=>`${PERS_ES[p]} ${ES.andaba[p]} por el monte.`,"Lehenaldia · pasado"],
+ ["noriPast",4,"noriPastSg",["noriPresSg","noriPastPl"],"nori","Txokolatea gustatzen ___.",p=>`${PERS_ES_DAT[p]} ${ES.me[p]} gustaba el chocolate.`,"NOR-NORI · pasado"],
+ ["diotPres",4,"diotPres",["dietPres","ukanPresSg"],"nnn","Liburua eman ___.",p=>`${PERS_ES[p]} le ${ES.haber[p]} dado el libro (a él).`,"NOR-NORI-NORK · a él"],
+ ["dietPres",4,"dietPres",["diotPres","ukanPresSg"],"nnn","Liburua eman ___.",p=>`${PERS_ES[p]} les ${ES.haber[p]} dado el libro (a ellos).`,"NOR-NORI-NORK · a ellos"],
+ ["diotPast",5,"diotPast",["diotPres","ukanPastSg"],"nnn","Atzo liburua eman ___.",p=>`${PERS_ES[p]} le ${ES.darPret[p]} el libro ayer (a él).`,"NOR-NORI-NORK · pasado"],
+ ["izanCond",5,"izanCond",["izanHip","izanPast"],"cond","Pozik joango ___.",p=>`${PERS_ES[p]} ${ES.iria[p]} encantado.`,"Baldintza · condicional"],
+ ["ukanCond",5,"ukanCond",["ukanHip","ukanPastSg"],"cond","Etxe hori erosiko ___.",p=>`${PERS_ES[p]} ${ES.compraria[p]} esa casa.`,"Baldintza · condicional"],
+ ["ukanHip",5,"ukanHip",["ukanCond","ukanPastSg"],"hip","Denbora ___, mendira joango ginateke.",p=>`Si ${PERS_ES[p].toLowerCase()} ${ES.tuviera[p]} tiempo, iríamos al monte.`,"Hipotesia · «si…»"],
+ ["izanHip",5,"izanHip",["izanCond","izanPast"],"hip","Bihar etorriko ___, ondo legoke.",p=>`Si ${PERS_ES[p].toLowerCase()} ${ES.viniera[p]} mañana, estaría bien.`,"Hipotesia · «si…»"]
+];
+function conjQ(maxL){
+  const pool=CONJ.filter(c=>c[1]<=maxL);
+  const [id,lv,para,sibs,kind,eu,esF,tense]=pool[Math.random()*pool.length|0];
+  const p=Math.random()*6|0; const ans=PARA[para][p];
+  const d=new Set();
+  shuffle([0,1,2,3,4,5].filter(x=>x!==p)).slice(0,2).forEach(x=>d.add(PARA[para][x]));
+  shuffle(sibs).forEach(sb=>{if(d.size<3&&PARA[sb][p]!==ans)d.add(PARA[sb][p])});
+  shuffle([0,1,2,3,4,5]).forEach(x=>{if(d.size<3&&PARA[para][x]!==ans)d.add(PARA[para][x])});
+  d.delete(ans);
+  const ERGP=["ukanPresSg","ukanPresPl","ukanPastSg","ukanPastPl","diotPres","dietPres","diotPast","ukanCond","ukanHip","edukiPres","edukiPast","jakinPres","jakinPast"];
+  const who=kind==="nori"?PERS_EU_DAT[p]:ERGP.includes(para)?PERS_EU_ERG[p]:PERS_EU[p];
+  return {id:"gc-"+id+"-"+p,kind:"conj",tag:tense,es:esF(p),eu,ans,opts:[ans,...[...d].slice(0,3)],
+    who,table:PARA[para].map((f,i)=>[kind==="nori"?PERS_EU_DAT[i]:ERGP.includes(para)?PERS_EU_ERG[i]:PERS_EU[i],f]),hl:p,
+    azalpena:`${who.charAt(0).toUpperCase()+who.slice(1)} → ${ans}. ${TIPS[kind]}`,lv};
+}
+/* ---------- Declinación ---------- */
+/* [tema, sg es, pl es, animado, r fuerte] */
+const NOUNS=[
+ ["etxe","la casa","las casas",0],["mendi","el monte","los montes",0],["hondartza","la playa","las playas",0],["kale","la calle","las calles",0],
+ ["herri","el pueblo","los pueblos",0],["eskola","la escuela","las escuelas",0],["hiri","la ciudad","las ciudades",0],["baso","el bosque","los bosques",0],
+ ["ibai","el río","los ríos",0],["lur","la tierra","las tierras",0,1],["ospitale","el hospital","los hospitales",0],["baserri","el caserío","los caseríos",0],
+ ["liburutegi","la biblioteca","las bibliotecas",0],["azoka","el mercado","los mercados",0],["eliza","la iglesia","las iglesias",0],["lantegi","la fábrica","las fábricas",0],
+ ["lagun","el amigo","los amigos",1],["irakasle","el profesor","los profesores",1],["ama","la madre","las madres",1],["aita","el padre","los padres",1],
+ ["neska","la chica","las chicas",1],["mutil","el chico","los chicos",1],["ume","el niño","los niños",1],["sendagile","el médico","los médicos",1],
+ ["bizilagun","el vecino","los vecinos",1],["alaba","la hija","las hijas",1],["ikasle","el alumno","los alumnos",1],["langile","el trabajador","los trabajadores",1]
+];
+const CASES={abs:"Absolutiboa (nor)",erg:"Ergatiboa (nork)",dat:"Datiboa (nori)",gen:"Genitiboa (noren)",soz:"Soziatiboa (norekin)",dest:"Destinatiboa (norentzat)",mot:"Motibatiboa (norengatik)",ines:"Inesiboa (non)",adl:"Adlatiboa (nora)",abl:"Ablatiboa (nondik)",lgen:"Leku-genitiboa (nongo)",aadl:"Adlatiboa, bizidunak (norengana)",aabl:"Ablatiboa, bizidunak (norengandik)"};
+const CASE_TIP={abs:"Sujeto de verbo intransitivo u objeto: sin terminación (-a / -ak).",erg:"Sujeto que hace algo a un objeto (verbo NOR-NORK): -k (sg. -ak, pl. -ek).",dat:"A quién: -ri (sg. -ari, pl. -ei).",gen:"De quién (posesión): -ren (sg. -aren, pl. -en).",soz:"Con quién: -rekin (sg. -arekin, pl. -ekin).",dest:"Para quién: -rentzat (sg. -arentzat, pl. -entzat).",mot:"Por quién / por causa de: -gatik (sg. -agatik, pl. -engatik).",ines:"Dónde: -n (sg. -an / -ean tras consonante, pl. -etan).",adl:"Adónde: -ra (sg. -ra / -era tras consonante, pl. -etara).",abl:"De dónde: -tik (sg. -tik / -etik tras consonante, pl. -etatik).",lgen:"De qué lugar: -ko (sg. -ko / -eko tras consonante, pl. -etako). Con personas se usa -ren.",aadl:"Con personas, «hacia» se dice -rengana (sg. -arengana, pl. -engana), no -ra.",aabl:"Con personas, «desde» se dice -rengandik (sg. -arengandik, pl. -engandik), no -tik."};
+function decl(n){
+  const [st,,,anim,hard]=n; const isA=st.endsWith("a"); const cons=/[^aeiou]$/.test(st);
+  const b=hard?st+"r":st; const art=isA?st:b+"a"; const pl=isA?st.slice(0,-1):b; const e=cons?"e":"";
+  return {
+    sg:{abs:art,erg:art+"k",dat:art+"ri",gen:art+"ren",soz:art+"rekin",dest:art+"rentzat",mot:art+"gatik",aadl:art+"rengana",aabl:art+"rengandik",
+        ines:isA?st+"n":b+e+"an",adl:b+e+"ra",abl:b+e+"tik",lgen:b+e+"ko"},
+    pl:{abs:pl+"ak",erg:pl+"ek",dat:pl+"ei",gen:pl+"en",soz:pl+"ekin",dest:pl+"entzat",mot:pl+"engatik",aadl:pl+"engana",aabl:pl+"engandik",
+        ines:pl+"etan",adl:pl+"etara",abl:pl+"etatik",lgen:pl+"etako"}
+  };
+}
+const esP=(prep,np)=>prep==="a"&&np.startsWith("el ")?"al "+np.slice(3):prep==="de"&&np.startsWith("el ")?"del "+np.slice(3):prep+" "+np;
+const capF=s=>s.charAt(0).toUpperCase()+s.slice(1);
+/* [caso, número, nivel, animado?, eu, es(np)] */
+const DECL_T=[
+ ["ines","sg",1,0,"___ nago.",n=>`Estoy ${esP("en",n)}.`],
+ ["adl","sg",1,0,"Bihar ___ joango naiz.",n=>`Mañana iré ${esP("a",n)}.`],
+ ["abl","sg",1,0,"___ nator.",n=>`Vengo ${esP("de",n)}.`],
+ ["abs","sg",2,1,"___ etorri da.",n=>`Ha venido ${n}.`],
+ ["abs","pl",2,1,"___ etorri dira.",n=>`Han venido ${n}.`],
+ ["erg","sg",2,1,"___ ogia erosi du.",n=>`${capF(n)} ha comprado el pan.`],
+ ["dat","sg",2,1,"Liburua ___ eman diot.",n=>`Le he dado el libro ${esP("a",n)}.`],
+ ["gen","sg",2,1,"Hau ___ etxea da.",n=>`Esta es la casa ${esP("de",n)}.`],
+ ["soz","sg",2,1,"___ hitz egin dut.",n=>`He hablado ${esP("con",n)}.`],
+ ["lgen","sg",2,0,"___ giroa oso ona da.",n=>`El ambiente ${esP("de",n)} es muy bueno.`],
+ ["erg","pl",3,1,"___ ogia erosi dute.",n=>`${capF(n)} han comprado el pan.`],
+ ["dat","pl",3,1,"Liburua ___ eman diet.",n=>`Les he dado el libro ${esP("a",n)}.`],
+ ["gen","pl",3,1,"Hau ___ etxea da.",n=>`Esta es la casa ${esP("de",n)}.`],
+ ["soz","pl",3,1,"___ hitz egin dut.",n=>`He hablado ${esP("con",n)}.`],
+ ["dest","sg",3,1,"Opari hau ___ da.",n=>`Este regalo es ${esP("para",n)}.`],
+ ["mot","sg",3,1,"___ etorri naiz.",n=>`He venido por ${n}.`],
+ ["ines","pl",3,0,"___ lan egin dut.",n=>`He trabajado ${esP("en",n)}.`],
+ ["dest","pl",4,1,"Opari hauek ___ dira.",n=>`Estos regalos son ${esP("para",n)}.`],
+ ["mot","pl",4,1,"___ etorri naiz.",n=>`He venido por ${n}.`],
+ ["adl","pl",4,0,"Udan ___ joan gara.",n=>`En verano hemos ido ${esP("a",n)}.`],
+ ["abl","pl",4,0,"Jendea ___ etorri da.",n=>`La gente ha venido ${esP("de",n)}.`],
+ ["lgen","pl",4,0,"___ jendea jatorra da.",n=>`La gente ${esP("de",n)} es maja.`],
+ ["aadl","sg",4,1,"___ hurbildu naiz.",n=>`Me he acercado ${esP("a",n)}.`],
+ ["aabl","sg",5,1,"Mezu hau ___ jaso dut.",n=>`He recibido este mensaje ${esP("de",n)}.`],
+ ["aadl","pl",5,1,"___ hurbildu naiz.",n=>`Me he acercado ${esP("a",n)}.`],
+ ["aabl","pl",5,1,"Mezu hau ___ jaso dut.",n=>`He recibido este mensaje ${esP("de",n)}.`]
+];
+function declQ(maxL){
+  const pool=DECL_T.filter(t=>t[2]<=maxL);
+  const [cs,num,lv,anim,eu,esF]=pool[Math.random()*pool.length|0];
+  const nouns=NOUNS.filter(n=>!!n[3]===!!anim); const n=nouns[Math.random()*nouns.length|0];
+  const F=decl(n); const ans=F[num][cs];
+  const near=anim?["abs","erg","dat","gen","soz","dest","mot","aadl","aabl"]:["ines","adl","abl","lgen"];
+  if(!anim&&(cs==="adl"||cs==="abl")) near.push("ines");
+  if(anim&&(cs==="aadl"||cs==="aabl")) near.push("dat","gen");
+  const d=new Set();
+  if(anim&&(cs==="aadl"||cs==="aabl")){ /* el error típico: usar -ra / -tik con personas */
+    d.add(F[num][cs==="aadl"?"adl":"abl"]);
+  }
+  d.add(F[num==="sg"?"pl":"sg"][cs]);
+  shuffle(near.filter(c=>c!==cs)).forEach(c=>{if(d.size<4)d.add(F[num][c])});
+  d.delete(ans); d.delete("");
+  const np=num==="sg"?n[1]:n[2];
+  const head=CASES[cs];
+  return {id:"gd-"+n[0]+"-"+cs+"-"+num,kind:"decl",tag:`${head} · ${num==="sg"?"singularra":"plurala"}`,es:esF(np),eu,ans,
+    opts:[ans,...[...d].slice(0,3)],word:F.sg.abs+" · "+n[1],
+    table:Object.keys(CASES).filter(c=>anim?!["ines","adl","abl","lgen"].includes(c):["abs","ines","adl","abl","lgen"].includes(c)).map(c=>[CASES[c].split(" (")[1].replace(")",""),F.sg[c],F.pl[c]]),
+    hlCase:CASES[cs].split(" (")[1].replace(")",""),hlNum:num,
+    azalpena:CASE_TIP[cs],lv};
+}
+function gramQ(which,maxL){const w=which==="mix"?(Math.random()<.5?"conj":"decl"):which;return w==="conj"?conjQ(maxL):declQ(maxL)}
+function gramTable(q){
+  if(q.kind==="conj") return `<table class="gt"><tbody>${q.table.map(([w,f],i)=>`<tr class="${i===q.hl?"on":""}"><th>${esc(w)}</th><td>${esc(f)}</td></tr>`).join("")}</tbody></table>`;
+  return `<table class="gt"><thead><tr><th></th><th>sg.</th><th>pl.</th></tr></thead><tbody>${q.table.map(([c,s,p])=>`<tr><th>${esc(c)}</th><td class="${c===q.hlCase&&q.hlNum==="sg"?"on":""}">${esc(s)}</td><td class="${c===q.hlCase&&q.hlNum==="pl"?"on":""}">${esc(p)}</td></tr>`).join("")}</tbody></table>`;
+}
+
+/* ---------- JUEGO DE GRAMÁTICA ---------- */
+const DM=()=>[1,.75,.55][(S.diff||2)-1];
+const maxHearts=()=>S.diff===3?2:3;
+const GRAM_NAMES={conj:"Aditzak",decl:"Deklinabidea",mix:"Nahastuta"};
+function startGram(which){
+  const qs=[],ids=new Set(); let guard=0;
+  while(qs.length<12&&guard++<400){const q=gramQ(which,S.lvl);if(!ids.has(q.id)){ids.add(q.id);qs.push(q)}}
+  G={mode:"gram",which,list:[],qs,i:0,hearts:maxHearts(),maxH:maxHearts(),combo:0,xp:0,right:0,missed:[],fast:0};
+  touchStreak(); save(); renderGame();
+}
+function gramTyped(){return S.diff===3||(S.lvl>=4&&Math.random()<.5)}
+function fillGap(q,ans){const s=q.eu.replace("___",`<span class="gapw">${esc(ans)}</span>`);return s.startsWith("<span")?s.replace(/(<span class="gapw">)(.)/,(m,a,c)=>a+c.toUpperCase()):s}
+/* Pinta la pregunta en `host` y llama a onAnswer(ok, escrito, tiempoAgotado) */
+function gramBody(host,q,secs,onAnswer){
+  const typed=gramTyped();
+  host.innerHTML=`<div class="prompt" id="prompt">
+      <div class="eyebrow">${esc(q.tag)}</div>
+      <div class="q long">${esc(q.es)}</div>
+      <div class="gram-eu">${esc(q.eu).replace("___",'<span class="gapw empty">?</span>')}</div>
+      ${q.word?`<div class="sub">Hitza: <b>${esc(q.word)}</b></div>`:""}
+    </div>
+    <div class="tbar"><i id="gtb"></i></div>
+    ${typed?`<form id="gf" style="display:flex;flex-direction:column;gap:10px" autocomplete="off"><input class="inp" id="gin" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" enterkeyhint="go" placeholder="Idatzi forma…"><button class="big" type="submit">Egiaztatu</button></form>`
+      :`<div class="opts g2">${shuffle(q.opts).map(o=>`<button class="opt">${esc(o)}</button>`).join("")}</div>`}`;
+  let done=false; const t0=performance.now();
+  const finish=(ok,val,timeout)=>{if(done)return;done=true;cancelAnimationFrame(timerRAF);
+    host.querySelectorAll(".opt").forEach(o=>{o.disabled=true;if(o.textContent===q.ans)o.classList.add("ok")});
+    const g=host.querySelector(".gapw"); if(g){g.textContent=q.ans;g.classList.remove("empty");g.classList.add(ok?"good":"bad")}
+    const f=host.querySelector("#gf"); if(f) f.remove(); const op=host.querySelector(".opts"); if(op) setTimeout(()=>op.remove(),ok?0:600);
+    onAnswer(ok,val,timeout,(performance.now()-t0)/1000)};
+  host.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const ok=b.textContent===q.ans;if(!ok)b.classList.add("bad");finish(ok,b.textContent,false)});
+  const gf=host.querySelector("#gf"); if(gf){const gi=host.querySelector("#gin");gi.focus();gf.onsubmit=e=>{e.preventDefault();if(!gi.value.trim())return;finish(norm(gi.value)===norm(q.ans),gi.value,false)}}
+  const tick=now=>{if(done)return;const left=Math.max(0,secs-(now-t0)/1000);const tb=host.querySelector("#gtb");if(!tb)return;
+    tb.style.width=(left/secs*100)+"%";tb.classList.toggle("warn",left<=4);if(left<=0)return finish(false,"",true);timerRAF=requestAnimationFrame(tick)};
+  timerRAF=requestAnimationFrame(tick);
+}
+function gramFeedback(q,ok,val,timeout){
+  const title=ok?rnd(OK_MSG):timeout?"Denbora amaitu!":rnd(BAD_MSG);
+  const body=`<span class="right-ans" style="font-size:20px">${fillGap(q,q.ans)}</span>${!ok&&val?`<span class="sub">Tú: <s>${esc(val)}</s></span>`:""}`;
+  return `<div class="sheet ${ok?"ok":"bad"} slim"><h3>${title}</h3><p>${body}</p><p class="expl"><b>Azalpena</b> ${esc(q.azalpena)}</p>${ok?"":gramTable(q)}</div>`;
+}
+function qGram(){
+  const q=G.qs[G.i];
+  shell(`<div id="ghost" class="ghost"></div>`);
+  const host=$("#ghost");
+  gramBody(host,q,Math.round(22*DM()),(ok,val,timeout,used)=>{
+    const it={id:q.id,eu:q.eu.replace("___",q.ans),es:q.es,type:"gram"};
+    G.qs[G.i]={...q,eu:it.eu};
+    award(ok,it);
+    if(ok){S.stats[q.kind==="conj"?"gramConj":"gramDecl"]=(S.stats[q.kind==="conj"?"gramConj":"gramDecl"]||0)+1;if(used<4){G.fast++;S.stats.fast=(S.stats.fast||0)+1}save()}
+    const box=document.createElement("div");box.innerHTML=gramFeedback(q,ok,val,timeout)+`<button class="big" id="next">${G.hearts<=0||G.i+1>=G.qs.length?"Ikusi emaitza":"Jarraitu"}</button>`;
+    box.style.cssText="display:flex;flex-direction:column;gap:10px";
+    host.appendChild(box); box.scrollIntoView({block:"nearest"});
+    const n=$("#next"); n.onclick=()=>{if(n.disabled)return;G.i++;renderGame()}; if(!ok)holdButton(n); else n.focus();
+    const hd=document.querySelector(".hearts"); if(hd) hd.innerHTML=[...Array(G.maxH||3)].map((_,k)=>ic("heart",k<G.hearts?"":"off")).join("");
+  });
+}
+/* Pregunta de gramática intercalada en Txapelketa / Erlojupean (cuesta una vida si fallas) */
+function gramOverlay(done){
+  const q=gramQ("mix",S.lvl);
+  const ov=document.createElement("div"); ov.className="bonus";
+  ov.innerHTML=`<div class="bonus-in gram"><div class="bonus-tag gtag">${ic("pen")} Gramatika!</div><div id="gob" style="display:flex;flex-direction:column;gap:14px"></div></div>`;
+  document.body.appendChild(ov); SFX.up();
+  const host=ov.querySelector("#gob");
+  gramBody(host,q,Math.round(18*DM()),(ok,val,timeout)=>{
+    mark({id:q.id},ok);
+    if(ok){if(G)G.xp+=30;S.stats[q.kind==="conj"?"gramConj":"gramDecl"]=(S.stats[q.kind==="conj"?"gramConj":"gramDecl"]||0)+1;SFX.ok();popup("+30")}
+    else{SFX.bad();buzz(120);if(G){G.hearts--;G.combo=0;G.missed.push({id:q.id,eu:q.eu.replace("___",q.ans),es:q.es})}}
+    save();
+    const box=document.createElement("div");box.style.cssText="display:flex;flex-direction:column;gap:10px";
+    box.innerHTML=gramFeedback(q,ok,val,timeout)+`<button class="big" id="gnext">Jarraitu</button>`;
+    host.appendChild(box);
+    const n=ov.querySelector("#gnext"); n.onclick=()=>{if(n.disabled)return;ov.remove();if(G){updHud();done()}}; if(!ok)holdButton(n); else n.focus();
+  });
+}
+
 /* ---------- ESAERA BONUS: cada 12 aciertos ---------- */
 const ES_EVERY=12;
 function esaeraBonus(done){
@@ -820,6 +1124,8 @@ const MEDALS=[
   ["lvl3","B1 maila","Llega al nivel B1",s=>S.lvl>=3],
   ["lvl5","C1 maila","Llega al nivel C1",s=>S.lvl>=5],
   ["verb10","Aditz trebea","Acierta 10 frases con verbos",s=>(s.verbOk||0)>=10],
+  ["conj25","Aditz-maisua","25 verbos bien conjugados",s=>(s.gramConj||0)>=25],
+  ["decl25","Deklinabide-maisua","25 declinaciones correctas",s=>(s.gramDecl||0)>=25],
   ["mine10","Hiztegigilea","Añade 10 palabras propias",s=>S.mine.length>=10],
   ["c100","Ehun","100 aciertos en total",s=>s.correct>=100],
   ["c500","Bostehun","500 aciertos en total",s=>s.correct>=500]
